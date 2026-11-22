@@ -1,0 +1,15 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+process.chdir(__dirname);
+fs.mkdirSync('bin', { recursive: true });
+fs.mkdirSync('.build', { recursive: true });
+const hooks = Object.values({ ...require('./src/social.cjs'), ...require('./src/dm-relationships.cjs'), ...require('./src/coordination.cjs'), ...require('./src/feature-policy.cjs') }).map(fn => fn.toString()).join('\n');
+const main = path.resolve('.build/launcher.cjs');
+const source = fs.readFileSync('src/launcher.cjs', 'utf8');
+fs.writeFileSync(main, source.replace('/* SOCIAL_HOOKS */', () => hooks));
+const output = path.resolve('bin/RL-Career-Modding.exe');
+const config = path.resolve('.build/RL-Career-Modding.json');
+fs.writeFileSync(config, JSON.stringify({ main, output, disableExperimentalSEAWarning: true }));
+execFileSync(process.execPath, ['--build-sea=' + config], { stdio: 'inherit' });
+execFileSync(output, ['--version'], { stdio: 'inherit' });
