@@ -1,0 +1,8 @@
+.build/
+bin/
+backup/
+__pycache__/
+*.pyc
+assets/*.wav
+assets/coach-portraits/*
+!assets/coach-portraits/sources.json

@@ -1,0 +1,58 @@
+<!doctype html><meta charset="utf-8"><pre id="out"></pre><script>
+const output = {};
+function texture(name, width, height, draw) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width * 3;
+  canvas.height = height * 3;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(3, 3);
+  draw(ctx);
+  output[name] = canvas.toDataURL('image/png').split(',')[1];
+}
+function icon(name, shape) {
+  texture(name, 32, 32, ctx => {
+    ctx.strokeStyle = '#f5f8fc';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(new Path2D(shape));
+  });
+}
+icon('shot', 'M16 6a10 10 0 1 1 0 20 10 10 0 1 1 0-20 M16 13a3 3 0 1 1 0 6 3 3 0 1 1 0-6 M16 3v6 M16 23v6 M3 16h6 M23 16h6');
+icon('save', 'M16 4l10 4v7c0 6-4 10-10 13-6-3-10-7-10-13V8z M11.5 16l3 3 6-6');
+icon('demo', 'm16 4 2.5 8 8-3-4.5 7.5 6 5-8-.5-2 7-4-7-7 .5 4-5.5-5-7 8 3z');
+icon('wreck', 'M8 14a8 8 0 0 1 16 0v5l-4 2v4h-8v-4l-4-2z M12 15h1 M19 15h1 M16 22v3');
+texture('panel', 220, 32, ctx => {
+  const fill = ctx.createLinearGradient(0, 0, 90, 75);
+  fill.addColorStop(0, '#252d37');
+  fill.addColorStop(.42, '#161b22');
+  fill.addColorStop(.43, '#0b0e13');
+  fill.addColorStop(1, '#11151b');
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, 220, 32);
+  ctx.fillStyle = '#66727e';
+  ctx.fillRect(0, 0, 220, .6);
+});
+texture('dial', 136, 136, ctx => {
+  const gradient = ctx.createRadialGradient(68, 62, 4, 68, 68, 64);
+  gradient.addColorStop(0, '#233243');
+  gradient.addColorStop(.68, '#111923');
+  gradient.addColorStop(1, '#07090d');
+  ctx.shadowColor = '#05070b';
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(68, 68, 63, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#778391';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.strokeStyle = '#354353';
+  ctx.lineWidth = 6;
+  ctx.arc(68, 68, 55, 0, 2 * Math.PI);
+  ctx.stroke();
+});
+document.getElementById('out').textContent = JSON.stringify(output);
+</script>

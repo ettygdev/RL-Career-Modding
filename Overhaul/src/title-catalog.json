@@ -1,0 +1,790 @@
+{
+  "starters": [
+    {
+      "id": "S37_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S23 Supersonic Legend"
+    },
+    {
+      "id": "S36_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S22 Supersonic Legend"
+    },
+    {
+      "id": "S35_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S21 Supersonic Legend"
+    },
+    {
+      "id": "S34_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S20 Supersonic Legend"
+    },
+    {
+      "id": "S33_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S19 Supersonic Legend"
+    },
+    {
+      "id": "S32_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S18 Supersonic Legend"
+    },
+    {
+      "id": "S31_SuperSonic_Legend",
+      "group": "ranked",
+      "display": "S17 SUPERSONIC LEGEND"
+    },
+    {
+      "id": "S31_Grand_Champion",
+      "group": "ranked",
+      "display": "S17 Grand Champion"
+    },
+    {
+      "id": "S32_Grand_Champion",
+      "group": "ranked",
+      "display": "S18 Grand Champion"
+    },
+    {
+      "id": "S33_Grand_Champion",
+      "group": "ranked",
+      "display": "S19 Grand Champion"
+    },
+    {
+      "id": "S34_Grand_Champion",
+      "group": "ranked",
+      "display": "S20 Grand Champion"
+    },
+    {
+      "id": "S31_SSL_Rumble",
+      "group": "extra",
+      "display": "S17 RNGENIUS"
+    },
+    {
+      "id": "S31_SSL_Snowday",
+      "group": "extra",
+      "display": "S17 ICE TITAN"
+    },
+    {
+      "id": "S32_SSL_Dropshot",
+      "group": "extra",
+      "display": "S18 Tile Annihilator"
+    },
+    {
+      "id": "S33_SSL_Hoops",
+      "group": "extra",
+      "display": "S19 Legendary Baller"
+    },
+    {
+      "id": "S34_SSL_Rumble",
+      "group": "extra",
+      "display": "S20 RNGenius"
+    },
+    {
+      "id": "S35_SSL_Hoops",
+      "group": "extra",
+      "display": "S21 Legendary Baller"
+    },
+    {
+      "id": "S35_SSL_Snowday",
+      "group": "extra",
+      "display": "S21 Ice Titan"
+    },
+    {
+      "id": "XP_RocketDemigod",
+      "group": "level",
+      "display": "Rocket Demigod",
+      "french": "Demi-dieu de Rocket"
+    },
+    {
+      "id": "XP_SupersonicLegend",
+      "group": "level",
+      "display": "Legendary Nemesis",
+      "french": "Ennemi Juré Légendaire"
+    },
+    {
+      "id": "XP_SupremeRival",
+      "group": "level",
+      "display": "Supreme Rival",
+      "french": "Rival suprême"
+    }
+  ],
+  "styles": {
+    "CRL_Analyst": [
+      "00FFAA",
+      ""
+    ],
+    "CRL_Season_1_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Season_1_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLCS_01_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_01_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_01_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_01_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_02_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_02_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_02_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_02_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_03_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_03_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_03_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_03_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_04_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_04_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_04_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_04_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_05_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_05_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_05_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_05_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_Analyst": [
+      "00FFAA",
+      ""
+    ],
+    "RLRS_01_Challenger": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLRS_02_Challenger": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_06_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_06_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_06_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_06_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLRS_03_Challenger": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "CRL_Season_2_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Season_2_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_02_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_03_SpringChampion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_03_SpringElite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_03_SpringContender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_03_FallChampion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_03_FallElite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_03_FallContender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLRS_04_Challenger": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_07_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_07_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_07_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_07_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLRS_05_Challenger": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_08_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_08_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_08_Grand_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_08_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLRS_06_Challenger": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_09_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_09_NA_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_09_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_09_EU_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Major_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Major_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Major_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Regional_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Regional_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "CRL_Spring_2020_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_2020_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_2020_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_Showdown_Champ": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_Showdown_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2020_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2020_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2020_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLCS_X_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_X_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "CRL_Spring_21_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_21_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_21_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2021_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2021_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2021_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLCS_21_22_Regional_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_21_22_Regional_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_21_22_Major_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_21_22_Major_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_21_22_Major_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_21_22_Major_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_WinterMajor_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_WinterMajor_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_WinterMajor_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_WinterMajor_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "CRL_Spring_22_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_22_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_22_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_22_WorldChampion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_22_Worlds_Finalist": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_22_Worlds_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_22_Worlds_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLCS_Spring_Major_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_Spring_Major_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_Spring_Major_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_Spring_Major_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_21_22_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_World_Champion_Finalist": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_World_Champion_Elite": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_World_Champion_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_Wildcard_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "CRL_Fall_22_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_22_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_22_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_23_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_23_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Spring_23_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_23_WorldChampion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_23_Worlds_Finalist": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_23_Worlds_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_23_Worlds_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLCS_22_23_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_Referee": [
+      "00FFAA",
+      ""
+    ],
+    "CRL_Fall_2023_Champion": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2023_Contender": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "CRL_Fall_2023_Elite": [
+      "FFEB5C",
+      "FFA300"
+    ],
+    "RLCS_2024_Challenger": [
+      "43CDFF",
+      "9966CC"
+    ],
+    "RLCS_2024_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2024_Regional_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2024_Major_1_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2024_Major_1_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2024_Major_2_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2024_Major_2_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2024_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_World_Championship_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "S31_Grand_Champion": [
+      "FF2800",
+      "FF2800"
+    ],
+    "S31_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S31_SSL_Rumble": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S31_SSL_Snowday": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "RLCS_2025_Challenger": [
+      "43CDFF",
+      "9966CC"
+    ],
+    "RLCS_2025_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_Regional_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_Major_1_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_Major_1_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_Major_2_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_Major_2_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_World_Championship_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "S32_Grand_Champion": [
+      "FF2800",
+      "FF2800"
+    ],
+    "S32_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S32_SSL_Dropshot": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S33_Grand_Champion": [
+      "FF2800",
+      "FF2800"
+    ],
+    "S33_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S33_SSL_Hoops": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S34_Grand_Champion": [
+      "FF2800",
+      "FF2800"
+    ],
+    "S34_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S34_SSL_Rumble": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "RLCS_BOSTON_2026_ATTENDEE": [
+      "BF5FFF",
+      ""
+    ],
+    "RLCS_PARIS_2026_ATTENDEE": [
+      "BF5FFF",
+      ""
+    ],
+    "S35_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S35_SSL_Snowday": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S35_SSL_Hoops": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "RLCS_2026_Challenger": [
+      "43CDFF",
+      "9966CC"
+    ],
+    "RLCS_2026_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_Regional_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_Major_1_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_Major_1_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_Major_2_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_Major_2_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_World_Championship_Contender": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2025_1v1_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_1v1_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "RLCS_2026_2v2_World_Champion": [
+      "AEF7FF",
+      "43AFFF"
+    ],
+    "S36_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ],
+    "S37_SuperSonic_Legend": [
+      "E8E8E8",
+      "E8E8E8"
+    ]
+  }
+}

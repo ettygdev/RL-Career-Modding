@@ -1,103 +1,43 @@
-<div align="center">
+# RLCareer Overhaul
 
-# RL Career Modding
+RLCareer Overhaul is Ettyg99’s Windows mod for **RL Career Hub**. It expands club management, changes how career bots play and adds a broadcast-style presentation for played and spectated series.
 
-**A more personal Rocket League career, starting with Y.**
+[Download v0.9.14](https://github.com/ettygdev/RL-Career-Modding/releases/tag/v0.9.14) · [Watch the Hub tour and full BO7](https://youtu.be/x7Wgc_EX07s) · [What changed since v0.3.12](docs/releases/v0.9.14.md) · [Source code](Overhaul/) · [License](LICENSE)
 
-Write to teammates, follow the conversation after a big series, and see how relationships can carry over into your next match.
+## Install and launch
 
-[**Download for Windows**](https://github.com/ettygdev/RL-Career-Modding/releases/tag/v0.3.12) · [Features](#features) · [Installation](#installation) · [Troubleshooting](#troubleshooting)
+1. Install RL Career Hub and complete its Rocket League, BakkesMod and RLBot setup.
+2. Download **RLCareer-Overhaul.exe** from Releases. It is the single installer-free download and includes the match integration.
+3. Place the file beside **RL Career Hub.exe**, then start your career through **RLCareer-Overhaul.exe**. The launcher installs the required local RLBot hooks and loads the included BakkesMod plugin when a career match is prepared.
+4. Check for **Overhaul v0.9.14** in the Hub. Restart Rocket League if it was already running and the overlays do not appear.
 
-**v0.3.12** · **Windows x64** · **RL Career Hub 0.2.0-beta.33**
+This release targets **Windows x64** and **RL Career Hub 0.2.0-beta.33**. It can start the Hub on its own or alongside **FilstaNet Modifier 0.11.4**, when the Modifier is installed beside the Hub. The Hub, Rocket League and the optional Modifier are separate products. Existing careers receive the new career data when loaded.
 
-</div>
+If you used the previous Career+ launcher, switch to the new executable. For an Epic installation using the optional Steam Input proxy, edit the existing non-Steam entry's target to point to the new executable and keep `--steam-input-proxy` in its launch options. In **Setup → Steam Input**, import the entry’s Steam shortcut if it needs to be linked again.
 
-## Features
+## Club management
 
-### A more interactive Y feed
+- **Player profiles and scouting.** Player cards show Overall, Composure and eight attributes covering attack, defense, mechanics, passing, bumps, game sense, ball control and communication. Scout players outside your club to reveal their ratings. You can hire and manage up to three scouts. Scout quality affects report precision and turnaround, and older reports can be refreshed.
+- **Coaches and mental training.** Search for and sign coaches during transfer windows. Coaches can affect training and composure and recommend tactical timeouts. Mental training improves composure gradually. Composure helps players manage pressure in important matches.
+- **Equipment and facilities.** Buy and equip individual setups using the club budget. PCs, monitors, controllers, headsets and peripherals affect player performance in the simulation. Facilities have Wi-Fi reliability and optional monthly subscriptions that affect the risk of technical issues in online events.
+- **World Editor.** Set player attributes and composure when creating players, and create custom coaches. Overall is calculated from the eight attributes.
+- **Garage and inventory.** Buy and equip cosmetics, browse owned items, switch titles and optionally apply custom car colors through BakkesMod. The club budget pays for purchases.
 
-- **Open profiles from mentions.** Select a recognized `@handle` in a post to jump directly to that account.
-- **Repost and undo a repost.** Shared posts appear in the **Reposts** tab on your profile. A check mark shows what you have already shared, and your repost does not add a second copy of the original to the same feed.
-- **Read and join comment threads.** Open a post’s comments, add your own, reply to someone, or follow one more reply within that branch. Collapse the thread or hide individual branches when you are done. Comments keep actions like likes, reposts and view counts close at hand.
-- **Get responses from the career world.** Some posts attract relevant comments from familiar faces, such as teammates or followers, and occasionally from players outside that circle. An author can respond directly to your comment or react after a repost. Whether someone responds depends in part on their personality and how well known you are.
-- **Give your own posts more reach.** Original posts have higher engagement targets and can pick up views, likes, reposts and replies sooner. Mentioned players can answer, with familiar teammates generally more responsive than big names outside your circle.
-- **Copy a post.** Use the copy action to grab its text without selecting the whole card.
+## On the field
 
-### Direct messages that affect relationships
+- **Bot mechanics and coordination.** Bots can take assigned kickoff roles, cover teammates, rotate out of crowded plays and recover onto the floor, walls or ceiling. Depending on the situation they may attempt air dribbles, flicks, flip resets, double taps, pinches, aerial passes and other mechanics. Ratings affect control precision. Fatigue, pressure, composure and equipment can influence performance.
+- **Optional Team Quick Chat.** Configure preset team and kickoff messages in the Hub. Bots can react to calls such as *I got it*, *Go for it* and *Center*, and send their own play calls. The feature can be switched off in the Hub.
+- **Broadcast presentation.** Watch with a spectator HUD featuring team logos, score, overtime and series status, live boost, player statistics and event indicators. Pro camera settings are used where available. Played matches use a compact scoreboard. Between games, the post-match screen shows the stats, series progress and a countdown with music.
+- **Match officials and timeouts.** Eligible series support tactical timeouts requested by the player or proposed by a coach. Online events can have referee-managed technical pauses tied to facility connection reliability.
 
-- **Start a conversation from a player’s profile.** Write your own message or revisit existing conversations from the in-game **Chat** list, where each conversation has a preview and date.
-- **Use a tone preset when you want a starting point.** Choose **Plain**, **Respect**, **Thanks**, **Joke**, **Hype**, **Cocky**, **Callout** or **Apology**. The preset puts an editable draft in the composer, so you can change it before sending.
-- **Get replies that fit the conversation.** A teammate responds, but their morale can make the reply warm or curt. Other players may answer briefly or leave you on read, depending on their personality, fame and relationship with you. A greeting, a compliment and a complaint about a loss can draw different replies.
-- **See trust and morale change immediately.** The meters stay visible at the top of the conversation as you scroll. Support, apologies and hostility can affect trust and, for teammates, morale. When a message has an effect, the chat shows the change beneath it. Repeating the same kind of message can run into a daily limit.
-- **Take a private rivalry public.** If you repeatedly antagonize a player, they may call out the behavior in a public Y post. The post can mention you while keeping your actual messages private.
+Mechanical attempts vary by match situation, and bot execution is still being tuned. If you find an issue, include your Hub and Modifier versions and say whether you were playing or spectating. A replay, screenshot or showcase timestamp helps.
 
-### Series recaps and match highlights
+## Source and maintenance
 
-- **Follow the story of a series.** Your club can post the score and call out a comeback, upset, sweep, decider, overtime or standout performance. A follower may comment on a memorable result.
-- **See individual plays mentioned by name.** With the optional **Match Add-on**, recaps can include goals, saves and probable flip resets. The post can name the player and game, and it can link a probable reset to a goal scored shortly afterward by the same player.
-- **Read the recap even when detailed match data is unavailable.** Y can still use the result and the stats recorded by the Hub.
+The [Overhaul source folder](Overhaul/) includes the launcher, Hub integration, overlay plugin, bot logic and build and test scripts. See the [build guide](Overhaul/README.md). The version history keeps the earlier Y Social work available for reference. The current release focuses on career management, match presentation and bots.
 
-### Match Add-on · Optional
+This mod is actively maintained by **Ettyg99**. Fixes, balancing changes and new features will continue to arrive.
 
-| Factor | What you can notice in a played career match |
-| --- | --- |
-| **Trust and team coordination** | Very low trust can make an affected teammate more willing to challenge when you and the bot are similarly placed for the ball. It can also drag down the trio’s form. |
-| **Pressure** | High-stakes matches and deciders can weigh more heavily at the start. Some players settle faster than others, especially after playing together for a while. |
-| **Fatigue** | Repeated games and overtime add to the workload. Fatigue can build during play and eases with rest between career days. |
-| **Post-series feedback** | The Y recap can show when the mod changed challenge priority, how often teammates approached the ball together and which factors affected form. An approach is an observation, and players can still back out before a double commit. |
+## License
 
-## Compatibility
-
-| Setup | What loads |
-| --- | --- |
-| **RL Career Hub 0.2.0-beta.33 without the Modifier** | RL Career Modding launches the Hub and enables Y. The Match Add-on is available separately. |
-| **FilstaNet Modifier installed beside the Hub** | The same launcher opens the Modifier automatically. The RL Career Modding badge still appears, while the Y changes and their match effects are switched off for that session. Tested with Modifier **0.7.0**. |
-
-The **RL Career Modding** badge sits below the existing badges at the top right of the Hub before a career is loaded. It hides once you enter a career.
-
-## Installation
-
-### Install the launcher
-
-1. Close the Hub and the Modifier if either is open.
-2. [Download the Windows x64 ZIP](https://github.com/ettygdev/RL-Career-Modding/releases/download/v0.3.12/RL-Career-Modding-v0.3.12-win-x64.zip) and extract it.
-3. Copy **RL-Career-Modding.exe** into the folder containing **RL Career Hub.exe**. The default location is `%LOCALAPPDATA%\Programs\RL Career Hub`.
-4. Start **RL-Career-Modding.exe**. Look for the badge in the Hub.
-
-The [standalone EXE](https://github.com/ettygdev/RL-Career-Modding/releases/download/v0.3.12/RL-Career-Modding.exe) is enough for the launcher and core Y features. Keep the extracted ZIP folder if you want to install the Match Add-on.
-
-### Install the optional Match Add-on
-
-Close the Hub and Rocket League. Open PowerShell **inside the extracted ZIP folder** and run the following. If your Hub is installed elsewhere, set `$hub` to that folder.
-
-```powershell
-$hub = Join-Path $env:LOCALAPPDATA 'Programs\RL Career Hub'
-& (Join-Path $hub 'resources\python\python.exe') .\install-coordination.py $hub
-```
-
-Keep the `backup` folder created by the installer. Start the career again through **RL-Career-Modding.exe**. If you want to compare matches with the match effects turned off, start the launcher with `--neutral` in standalone mode.
-
-## Updates and removal
-
-- **Update the launcher.** Close the Hub and replace the EXE with the one from the latest release. If you used a previous launcher named `Y-Social.exe`, start using `RL-Career-Modding.exe`.
-- **Update the Match Add-on.** If you installed it from a previous version, restore it using that version’s installer and backup first, then install the new version.
-- **Remove the Match Add-on.** Close the Hub and Rocket League. From the folder containing the installer and its `backup` directory, run the same PowerShell commands with `--restore` added to the second line.
-- **Play without RL Career Modding.** Open the Hub or the Modifier directly. To remove the launcher, delete `RL-Career-Modding.exe` from the Hub folder. Existing messages and posts written to your career save stay there.
-
-## Troubleshooting
-
-| If you see this | Try this |
-| --- | --- |
-| The launcher cannot find the Hub | Move `RL-Career-Modding.exe` next to `RL Career Hub.exe`. |
-| The badge is visible, but the new Y features are missing | Check for the FilstaNet badge. RL Career Modding disables its Y changes when the Modifier is loaded. |
-| The badge disappears when a career loads | This is expected. The badge is shown in the Hub before loading a career. |
-| A recap shows the result without individual plays | Install the optional Match Add-on and play another series in standalone mode. Detailed highlights only appear when the relevant match data is available. |
-| The add-on installer reports an unexpected Hub file | Check the supported Hub version. If an older add-on is installed, restore it with its original backup and installer before trying again. |
-
-For launch errors, check `%TEMP%\RL-Career-Modding.log`. If you [report an issue](https://github.com/ettygdev/RL-Career-Modding/issues), include your Hub version, whether FilstaNet was loaded, and what you did immediately before the problem.
-
-## Credits
-
-Maintained by [ettygdev](https://github.com/ettygdev). The Modifier is a separate project by **FilstaNet**. Thanks to the creators of RL Career Hub and Rocket League.
-
-[Source code](https://github.com/ettygdev/RL-Career-Modding/tree/main/RL%20Career%20Modding) · [Release history](https://github.com/ettygdev/RL-Career-Modding/releases)
+Original RLCareer Overhaul source code is available under the [MIT License](LICENSE). You can use, edit, fork and republish it, including modified versions, provided you retain the copyright credit to **Ettyg99** and the license notice in copies or substantial portions. Third-party software and media retain their own terms. See [Third-party notices](Overhaul/THIRD-PARTY.md).
