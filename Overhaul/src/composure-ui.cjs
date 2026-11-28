@@ -117,6 +117,76 @@ function installComposureUi() {
       (feedback?'<div class="panel-note" role="status">'+esc(feedback)+'</div>':'') + '</div>';
   }
 
+
+  function individualDrills(career) {
+    const names = [
+      tr('Counterattacks','Contre-attaques'),tr('Goal-line saves','Arrêts sur la ligne'),
+      tr('Aerial resets','Resets aériens'),tr('Passing lanes','Lignes de passe'),
+      tr('Bump routes','Trajectoires de bump'),tr('Rotation reads','Lecture des rotations'),
+      tr('First touches','Premières touches'),tr('Team calls','Communication du trio')
+    ];
+    const today = Math.floor(Date.parse(career.currentDate)/86400000);
+    const cards = (teamById(career.userTeamId)?.playerIds || []).map(id=>playerById(id)).filter(p=>
+      p && !p.retired && (!(typeof isPlayerMode === 'function' && isPlayerMode()) || p.id === career.userPlayerId));
+    const attributes=[
+      tr('Attack','Attaque'),tr('Defense','Défense'),tr('Mechanics','Mécaniques'),tr('Passing','Passes'),
+      tr('Bumping','Bumps'),tr('Game sense','Lecture du jeu'),tr('Ball control','Contrôle du ballon'),tr('Communication','Communication')
+    ];
+    const descriptions=[
+      tr('Break forward sooner and contest offensive 50/50s.', 'Transition plus rapide vers l’attaque et meilleurs 50/50 offensifs.'),
+      tr('Read threats and approach saves with more precision.', 'Mieux lire les menaces et se placer pour les arrêts.'),
+      tr('Execute aerial moves and resets more accurately.', 'Exécuter les mécaniques aériennes et les resets avec plus de précision.'),
+      tr('Find passing lanes and aim toward the receiver.', 'Repérer les lignes de passe et mieux viser le réceptionneur.'),
+      tr('Choose and line up bump attempts.', 'Mieux choisir et aligner les tentatives de bump.'),
+      tr('Improve positioning and decisions during rotations.', 'Améliorer le placement et les décisions pendant les rotations.'),
+      tr('Keep the ball closer on the ground or in the air.', 'Garder le ballon plus proche au sol et en l’air.'),
+      tr('Announce intentions sooner with Quick Chat.', 'Annoncer plus vite ses intentions dans le Quick Chat.')
+    ];
+    return '<style>.rlc-drill-player{appearance:none;border:0;color:inherit;font:inherit;cursor:pointer;width:100%}.rlc-drill-player:focus-visible{outline:2px solid var(--accent)}.rlc-drill-dialog{position:fixed;inset:0;width:min(94vw,1320px);height:fit-content;max-height:84vh;margin:auto;padding:0;border:0;background:var(--navy-2,#262d38);color:var(--text,#fff);overflow:auto}.rlc-drill-dialog::backdrop{background:#0005;backdrop-filter:blur(6px)}.rlc-drill-split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}.rlc-drill-list,.rlc-drill-side{padding:clamp(1rem,2vw,2rem)}.rlc-drill-list{background:var(--card,var(--navy-2,#262d38))}.rlc-drill-side{background:#384150;color:#f4f6fb;display:flex;flex-direction:column;min-height:24rem}.rlc-drill-title{margin:0 0 .5rem;font-size:clamp(1.35rem,2.1vw,2rem);text-transform:uppercase}.rlc-drill-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem;margin-top:1rem}.rlc-drill-option{display:flex;align-items:flex-start;gap:.7rem;min-height:5rem;padding:.85rem;background:var(--navy-3,var(--navy-2));border:1px solid color-mix(in srgb,currentColor 16%,transparent);cursor:pointer}.rlc-drill-option:focus-within{outline:2px solid var(--accent);outline-offset:-2px}.rlc-drill-option:has(input:checked){background:var(--accent,#da253d);color:var(--accent-ink,#fff)}.rlc-drill-option input{accent-color:var(--accent)}.rlc-drill-option small{display:block;margin-top:.25rem}.rlc-drill-actions{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:auto;padding-top:1rem}.rlc-drill-side [hidden]{display:none!important}.rlc-drill-side form{align-self:flex-end}.rlc-drill-preview meter{width:100%;height:1rem;accent-color:var(--accent)}@media(max-width:750px){.rlc-drill-split{grid-template-columns:1fr}.rlc-drill-side{min-height:13rem}}</style><div class="tsq-wrap"><div class="tsq-grid">'+cards.map(p=>{
+      const used=(p.rlcDrillDays || []).filter(d=>d>today-7).length;
+      const remaining=Math.max(0,3-used);
+      const id=Number(p.id);
+      const maximum=career.realism>=1?Math.min(99,(p.potential||p.rating)+1):99;
+      const progress=index=>Math.min(99,Math.floor(100*(p.rlcDrillFraction?.[index] ??
+        (p.rlcDrillProgress?.[index]||0)/3)));
+      const options=names.map((name,index)=>{
+        const rating=p.rlcAttributes?.values?.[index];
+        return '<label class="rlc-drill-option"><input type="checkbox" value="'+index+'"'+
+          (!remaining || !Number.isFinite(rating) || rating>=maximum?' disabled':'')+'><span><strong>'+esc(name)+
+          '</strong><small>'+esc(attributes[index])+' · '+esc(String(rating??'—'))+'</small></span></label>';
+      }).join('');
+      const previews=names.map((name,index)=>'<section class="rlc-drill-preview" data-rlc-drill-preview="'+index+'"'+
+        (index?' hidden':'')+'><h3 class="rlc-drill-title">'+esc(name)+'</h3><p>'+esc(descriptions[index])+
+        '</p><p><strong>'+esc(attributes[index])+'</strong> · '+esc(String(p.rlcAttributes?.values?.[index]??'—'))+
+        '</p><meter min="0" max="100" value="'+progress(index)+'"></meter><p>'+
+        progress(index)+'% · '+esc(tr('progress toward +1','progression vers +1'))+'</p></section>').join('');
+      return '<button type="button" class="tsq rlc-drill-player" data-rlc-drill-player="'+id+
+        '" aria-haspopup="dialog"><span class="tsq-face">'+faceHtml(p.name,p.id,'tsq-photo')+
+        '</span><span class="tsq-name">'+esc(p.name)+'</span><small>'+remaining+' · '+
+        esc(tr('sessions available','séances disponibles'))+'</small></button>'+
+        '<dialog class="rlc-drill-dialog" id="rlc-drill-'+id+'" data-limit="'+remaining+'" aria-labelledby="rlc-drill-title-'+id+
+        '"><div class="rlc-drill-split"><section class="rlc-drill-list"><h2 class="rlc-drill-title" id="rlc-drill-title-'+id+'">'+esc(tl('Training'))+
+        '</h2><p>'+esc(p.name)+' · '+remaining+' '+esc(tr('sessions available','séances disponibles'))+
+        '</p><div class="rlc-drill-options">'+options+'</div></section>'+
+        '<aside class="rlc-drill-side"><form method="dialog"><button class="btn ghost" aria-label="'+esc(tr('Close','Fermer'))+'">×</button></form>'+
+        previews+'<p role="status"></p><div class="rlc-drill-actions"><span aria-live="polite" data-rlc-drill-count>0 / '+remaining+
+        '</span><button type="button" class="btn primary" data-rlc-drill="'+id+'" disabled>'+
+        esc(tr('Start selected sessions','Lancer les séances choisies'))+'</button></div></aside></div></dialog>';
+    }).join('')+'</div><p role="status">'+esc(feedback)+'</p></div>';
+  }
+  if (typeof trainingTileHtml === 'function') {
+    const trainingTile = trainingTileHtml;
+    trainingTileHtml = function (...args) {
+      const template = document.createElement('template');
+      template.innerHTML = trainingTile.apply(this,args);
+      const tile = [...template.content.querySelectorAll('.tile')].find(element =>
+        element.querySelector('.tile-title')?.textContent.trim() === tl('Training'));
+      const description = tile?.querySelector('.tile-desc');
+      if (description) description.textContent = tr(
+        'Technical and mental training', 'Entraînement technique et mental');
+      return template.innerHTML;
+    };
+  }
   trainingHtml = function (...args) {
     const career = C();
     if (!career?.teams || !career.players) return originalTraining.apply(this,args);
@@ -130,12 +200,11 @@ function installComposureUi() {
       '" data-rlc-training-tab="'+value+'" aria-pressed="'+active+'">'+esc(text)+'</button>';
     return '<div class="ptabs rlc-training-tabs">'+tab('standard',tl('Training'),!mentalMode)+
       tab('mental',mentalLabel(),mentalMode)+'</div>' +
-      (mentalMode ? preparation(career) : originalTraining.apply(this,args));
+      (mentalMode ? preparation(career) : individualDrills(career));
   };
   if (typeof BIG_LISTS !== 'undefined' && BIG_LISTS.training) {
-    const originalSub = BIG_LISTS.training.sub;
     BIG_LISTS.training.sub = function (...args) {
-      if (!mentalMode) return originalSub.apply(this,args);
+      if (!mentalMode) return esc(tr("Individual training · three sessions per player", "Entraînement individuel · trois séances par joueur"));
       const coach = teamById(C()?.userTeamId)?.rlcMentalCoach;
       return statLineHtml([
         { k:tr('Coach','Coach'),v:esc(coach?.name || tr('Unassigned','Poste vacant')) },
@@ -144,7 +213,52 @@ function installComposureUi() {
     };
   }
 
+  document.addEventListener('focusin',event=>{
+    const dialog=event.target.closest?.('.rlc-drill-dialog');
+    if (!dialog || event.target.type!=='checkbox') return;
+    for (const panel of dialog.querySelectorAll('[data-rlc-drill-preview]')) {
+      panel.hidden=panel.dataset.rlcDrillPreview!==event.target.value;
+    }
+  });
+  document.addEventListener('change',event=>{
+    const dialog=event.target.closest?.('.rlc-drill-dialog');
+    if (!dialog || event.target.type!=='checkbox') return;
+    const checked=[...dialog.querySelectorAll('input:checked')];
+    const limit=Number(dialog.dataset.limit);
+    if (checked.length>limit) event.target.checked=false;
+    const count=Math.min(checked.length,limit);
+    dialog.querySelector('[data-rlc-drill-count]').textContent=count+' / '+limit;
+    dialog.querySelector('[data-rlc-drill]').disabled=!count;
+  });
   document.addEventListener('click', async event => {
+    const drillCard=event.target.closest?.('[data-rlc-drill-player]');
+    if (drillCard && !busy) {
+      document.getElementById("rlc-drill-"+drillCard.dataset.rlcDrillPlayer)?.showModal();
+      return;
+    }
+    const drill = event.target.closest?.('[data-rlc-drill]');
+    if (drill) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (busy || drill.disabled) return;
+      busy=true;
+      const snapshot=S;
+      try {
+        const dialog=drill.closest('dialog');
+        const indices=[...dialog.querySelectorAll('input:checked')].map(field=>field.value);
+        if (!indices.length) return;
+        const result=await window.hub.setDayNote({day:key,text:'drill:'+drill.dataset.rlcDrill+':'+indices.join(',')});
+        if (S===snapshot) {
+          if (result?.ok && result.career) S={...S,...result};
+          feedback=result?.ok?tr('Session completed.','Séance terminée.'):tr('Session unavailable.','Séance indisponible.');
+          if (result?.ok) { dialog.close(); render(); }
+          else dialog.querySelector('[role="status"]').textContent=feedback;
+        }
+      } catch {
+        drill.closest('dialog')?.querySelector('[role="status"]')?.replaceChildren(tr('Session unavailable.','Séance indisponible.'));
+      } finally { busy=false; }
+      return;
+    }
     const changeTab = event.target.closest?.('[data-rlc-training-tab]');
     const choose = event.target.closest?.('[data-rlc-training-pick]');
     if (changeTab || choose) {

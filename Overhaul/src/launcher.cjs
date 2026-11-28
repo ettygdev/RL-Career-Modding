@@ -19,9 +19,9 @@ const { spawn } = require('node:child_process');
 const { randomUUID, randomInt } = require('node:crypto');
 const { getAsset } = require('node:sea');
 
-const version = '0.9.14';
+const version = '0.10.2';
 /* INVENTORY_HOOKS */
-const supportedVersions = ['0.2.0-beta.33'];
+const supportedVersions = ['0.2.0-beta.33', '0.2.0-beta.34'];
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function evaluate(socket, expression) {
@@ -160,17 +160,7 @@ async function main() {
       }
     }
   }
-  const child = spawn(executable, compatible ? [hub] : ['--inspect=127.0.0.1:' + port], {
-    cwd: path.dirname(executable), env: { ...process.env, RLC_INVENTORY_LAUNCH_TOKEN: nonce, ...(compatible ? { BTIER_PORT: String(port) } : {}) },
-    stdio: 'ignore', detached: true
-  });
-  await new Promise((resolve, reject) => {
-    child.once('spawn', resolve);
-    child.once('error', reject);
-  });
-  child.unref();
-  console.log(compatible ? 'FilstaNet lancé. Attente du Hub et du signal FilstaNet.' : 'Hub lancé. Attente de sa fenêtre.');
-  const badge = JSON.stringify('(' + installModBadge.toString() + ')(' + JSON.stringify(version) + ')');
+  const badge = JSON.stringify('(' + installModBadge.toString() + ')(' + JSON.stringify(version) + ',' + JSON.stringify(compatible) + ',' + JSON.stringify(modifierVersion) + ')');
   const renderer = JSON.stringify('(' + installInventoryUi.toString() + ')()');
   const inventory = '(' + installInventoryEngine.toString() + ')';
   const titleCatalog = getAsset('inventoryTitles', 'utf8');
@@ -211,6 +201,7 @@ async function main() {
   const steamProxy = '(' + requestSteamProxy.toString() + ')';
   const releaseCheck = '(' + latestCareerRelease.toString() + ')';
   const notice = '(' + showVersionNotice.toString() + ')';
+  const update = '(' + installCareerUpdate.toString() + ')';
   const compare = '(' + compareVersions.toString() + ')';
   const careerSetup = JSON.stringify('(' + installCareerSetup.toString() + ')(' +
     JSON.stringify(process.execPath) + ',' + JSON.stringify(version) + ')');
@@ -236,10 +227,14 @@ async function main() {
         '{windowsHide:true,timeout:4500,maxBuffer:32768},(error,output)=>{' +
           'if(error){reject(error);return;}try{resolve(JSON.parse(output).tagName);}catch(e){reject(e);}' +
         '});' +
-      '})).then(remote=>' + notice + '(electron.dialog,window,' + JSON.stringify(version) + ',remote,' +
-        compatible + ',' + JSON.stringify(modifierVersion) + ',' + compare + ')).catch(()=>{});' +
+      '})).then(remote=>{' +
+        'if(remote && ' + compare + '(' + JSON.stringify(version) + ',remote)===-1) void ' +
+          update + '(remote,' + JSON.stringify(version) + ',electron,window);' +
+        notice + '(electron.dialog,window,' + JSON.stringify(version) + ',null,' +
+        compatible + ',' + JSON.stringify(modifierVersion) + ',' + compare + ');}).catch(()=>{});' +
     '}' +
-    (compatible ? 'if (!(await window.webContents.executeJavaScript("window.__btierUI === true"))) return "waiting-filsta";' : '') +
+    (compatible ? 'if (!(await window.webContents.executeJavaScript("Boolean(window.__btierUI || document.querySelector(\'.mod-version-label\'))"))) return "waiting-filsta";' : '') +
+    'await window.webContents.executeJavaScript(' + badge + ');' +
     'const modules = process.getBuiltinModule("module")._cache;' +
     'const find = file => Object.values(modules).find(module => module.filename?.split(String.fromCharCode(92)).join("/").endsWith("/app.asar/" + file))?.exports;' +
     'const loadThumbnails = ' + thumbnails + '((id,image,paints) => window.webContents.executeJavaScript("window.__rlcInventoryThumbnail?.(" + JSON.stringify(id) + "," + JSON.stringify(image) + "," + JSON.stringify(paints) + ")"));' +
@@ -274,7 +269,12 @@ async function main() {
       '()=>window.webContents.executeJavaScript("localStorage.getItem(\u0027rlc-epic-steam-shortcut\u0027)||\u0027\u0027"),uri=>electron.shell.openExternal(uri),' + steamProxy + ',composure);' +
     'if (careerExtras === "waiting-engine") return careerExtras;' +
     'officials=' + officialsEngine + '(league,talk,' + officialsRules + ',{read:(dir,file)=>fs.readFileSync(path.join(dir,file),"utf8"),write:(dir,file,value)=>fs.writeFileSync(path.join(dir,file),value),remove:(dir,file)=>fs.rmSync(path.join(dir,file),{force:true})});' +
-    'officials?.holdNextGame(process.getBuiltinModule("child_process"));' +
+    'const cp=process.getBuiltinModule("child_process");' +
+    'if(!cp.ChildProcess.prototype.spawn.rlcSilent){const spawn=cp.ChildProcess.prototype.spawn;function quiet(options){' +
+      'const name=process.getBuiltinModule("path").win32.basename(String(options?.file||"")).toLowerCase();' +
+      'if(["cmd","cmd.exe","python","python.exe","rlbotserver.exe","powershell.exe"].includes(name))options={...options,windowsHide:true};' +
+      'return spawn.call(this,options);}quiet.rlcSilent=true;cp.ChildProcess.prototype.spawn=quiet;}' +
+    'officials?.holdNextGame(cp);' +
     recruitment + '(league,' + recruitmentRulesSource + ',' + attributeResearch + ',find("setup/player-bots.js"));' +
     setupGear + '(league,' + gearCatalog + ');' +
     'await window.webContents.executeJavaScript(' + careerSetup + ');' +
@@ -290,7 +290,6 @@ async function main() {
     'await window.webContents.executeJavaScript(' + setupGearUi + ');' +
     'await window.webContents.executeJavaScript(' + ratingDials + ');' +
     'await window.webContents.executeJavaScript(' + worldAttributeUi + ');' +
-    'if (' + JSON.stringify(readyStates) + '.includes(status)) await window.webContents.executeJavaScript(' + badge + ');' +
     'return status;' +
     '})()';
   const deadline = Date.now() + 120000;
@@ -301,12 +300,22 @@ async function main() {
     'const until = ' + deadline + ';' +
     'const file = ' + JSON.stringify(statusFile) + ';' +
     'const check = async () => {' +
-      'let result; try { result = await ' + injection + '; } catch { result = "waiting-window"; }' +
+      'let result; try { result = await ' + injection + '; } catch(error) { result = "integration-error:" + String(error?.message || error).slice(0, 240); }' +
       'if ((' + JSON.stringify(readyStates) + '.includes(result) || result.startsWith("wrong-version:")) || Date.now() >= until) {' +
         'try { fs.writeFileSync(file, JSON.stringify(result), { flag: "wx" }); } catch {}' +
       '} else setTimeout(check, 250).unref();' +
     '}; setTimeout(check, 0).unref(); return "armed";' +
     '})()';
+  const child = spawn(executable, compatible ? [hub] : ['--inspect=127.0.0.1:' + port], {
+    cwd: path.dirname(executable), env: { ...process.env, RLC_INVENTORY_LAUNCH_TOKEN: nonce, ...(compatible ? { BTIER_PORT: String(port) } : {}) },
+    stdio: 'ignore', detached: true, windowsHide: true
+  });
+  await new Promise((resolve, reject) => {
+    child.once('spawn', resolve);
+    child.once('error', reject);
+  });
+  child.unref();
+  console.log(compatible ? 'FilstaNet lancé. Attente du Hub et du signal FilstaNet.' : 'Hub lancé. Attente de sa fenêtre.');
   let status = 'Inspector inaccessible';
   try {
   while (Date.now() < deadline) {
@@ -342,7 +351,7 @@ async function main() {
     } finally {
       socket?.close();
     }
-    await sleep(compatible ? 150 : 750);
+    await sleep(compatible ? 35 : 350);
   }
   throw new Error('Chargement d’Inventory non confirmé. Dernier état : ' + status);
   } finally {

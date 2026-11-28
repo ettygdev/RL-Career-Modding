@@ -18,6 +18,18 @@ function installInventoryEngine(engine, locker, titles, rcon, fs, path, loadThum
       if (tournamentTitle(preset.title)) preset.title = null;
     }
   }
+  const nativeChoices = titles.choices;
+  titles.choices = function careerTitleChoices(player) {
+    const standard = nativeChoices.apply(this, arguments) || [];
+    const wins = new Set(standard.filter(title=>title.kind==='worlds_champion' && title.year).map(title=>title.year));
+    const awards = [2,3].filter(count=>wins.size>=count).map(count=>({
+      key:'rlc:worlds:'+count,
+      id:'RLCS_2026_World_Champion',
+      display:count===2?'Two-Time RLCS World Champion':'Three-Time RLCS World Champion',
+      french:count===2?'Double champion du monde RLCS':'Triple champion du monde RLCS'
+    }));
+    return [...awards,...standard];
+  };
   const starters = titleCatalog.starters.map(title => ({ ...title, key: 'id:' + title.id }));
   const earned = state => (titles.choices(engine.playerById(state, state.userPlayerId)) || []).filter(title => !tournamentTitle(title.id));
   const choices = state => [...new Map([
@@ -150,6 +162,9 @@ function installInventoryEngine(engine, locker, titles, rcon, fs, path, loadThum
     const starter = ticket && starters.find(title => title.key === preset.title);
     const title = ticket && earned(state).find(title => title.key === preset.title);
     const lines = originalTitles.call(this, title ? { ...state, locker: { title: title.key } } : state, ids, ...args);
+    if (title?.key.startsWith('rlc:worlds:')) {
+      return [...lines.filter(line => !line.startsWith('@you\t')), '@you\t' + title.id + '\t' + title.display];
+    }
     if (!starter || title) return lines;
     return [...lines.filter(line => !line.startsWith('@you\t')), '@you\t' + starter.id + '\t'];
   };

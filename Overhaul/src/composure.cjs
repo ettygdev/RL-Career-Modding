@@ -170,6 +170,39 @@ function installComposure(engine, talk, staff) {
       const staffChanged = staff?.needsSave(state);
       return { ok: playerChanged || !!staffChanged };
     }
+    const drill = /^drill:(\d+):([0-7](?:,[0-7]){0,2})$/.exec(text);
+    if (drill) {
+      const player = engine.playerById(state, Number(drill[1]));
+      const indices = drill[2].split(',').map(Number);
+      const today = day(state);
+      if (!player || player.retired || player.teamId !== state.userTeamId || state.liveGame ||
+          state.pendingMatch != null || !Number.isFinite(today) ||
+          (engine.isPlayerCareer?.(state) && player.id !== state.userPlayerId)) return {ok:false};
+      const stats = player.rlcAttributes;
+      if (!stats || stats.values?.length !== 8) return {ok:false};
+      const maximum = state.realism >= 1 ? Math.min(99,(player.potential || player.rating)+1) : 99;
+      const recent = (player.rlcDrillDays || []).filter(d => d > today - 7);
+      if (recent.length + indices.length > 3) return {ok:false};
+      const fraction = stats.values.map((_,index)=>player.rlcDrillFraction?.[index] ??
+        (player.rlcDrillProgress?.[index] || 0)/3);
+      const values = [...stats.values];
+      for (const index of indices) {
+        const current = values[index] + fraction[index];
+        if (current >= maximum) return {ok:false};
+        const next = Math.min(maximum, current + .08 * Math.exp(-(current - 60)/16));
+        values[index] = Math.floor(next);
+        fraction[index] = next - values[index];
+      }
+      player.rlcDrillFraction = fraction;
+      stats.values = values;
+      const mean = values.reduce((sum,v)=>sum+v,0)/8;
+      const overall = Math.round(mean);
+      stats.offsets = values.map(v=>v-mean);
+      if (player.rating !== overall) player.ratingExact = overall;
+      stats.rating = player.rating = overall;
+      player.rlcDrillDays = [...recent,...indices.map(()=>today)];
+      return {ok:true};
+    }
     const target = /^train:([0-9]+)$/.exec(text);
     const player = target && engine.playerById(state, Number(target[1]));
     const own = player && !player.retired && player.teamId === state.userTeamId;

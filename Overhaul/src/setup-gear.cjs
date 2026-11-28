@@ -3,16 +3,16 @@
 function setupGearCatalog() {
   return [
     ['pc','Gaming PCs','PC gaming',[
-      ['Dell','G5 5000',61,0],['Lenovo','Legion Tower 5',77,1050],['HP','OMEN 45L',90,1950],['CORSAIR','ONE i500',98,3100]]],
+      ['Dell','G5 5000',61,0],['Lenovo','Legion Tower 5',77,1050],['HP','OMEN 45L',90,1950],['CORSAIR','ONE i500',98,3100],['Acer','Predator Orion 5000',86,1610],['Lenovo','Legion Tower 7i',94,2300],['Dell','Alienware Aurora R16',88,1750],['HP','OMEN 35L',85,1570],['CORSAIR','VENGEANCE i7500',95,2550],['Acer','Predator Orion 7000',96,2600]]],
     ['monitor','Monitors','Écrans',[
-      ['BenQ','ZOWIE XL2411K',62,0],['Dell','Alienware AW2523HF',80,330],['ASUS ROG','Swift PG27AQN',94,690],['BenQ','ZOWIE XL2586X',99,970]]],
+      ['BenQ','ZOWIE XL2411K',62,0],['Dell','Alienware AW2523HF',80,330],['ASUS ROG','Swift PG27AQN',94,690],['BenQ','ZOWIE XL2586X',99,970],['AOC','AGON PRO AG254FG',91,550],['ViewSonic','XG2431',83,310],['ViewSonic','XG251G',92,495],['Dell','Alienware AW2524HF',95,560],['ASUS ROG','Swift PG248QP',98,795],['AOC','24G4X',74,165]]],
     ['controller','Controllers','Manettes',[
-      ['Microsoft','Xbox Wireless Controller',64,0],['Sony','DualSense',77,75],['GameSir','G7 SE',85,90],['Sony','DualSense Edge',98,200]]],
+      ['Microsoft','Xbox Wireless Controller',64,0],['Sony','DualSense',77,75],['GameSir','G7 SE',85,90],['Sony','DualSense Edge',98,200],['8BitDo','Ultimate 2C',78,36],['GameSir','Kaleid',88,85],['Microsoft','Xbox Elite Wireless Controller Series 2',92,170],['8BitDo','Ultimate 2',87,65]]],
     ['headset','Headsets','Casques',[
-      ['HyperX','Cloud Stinger 2',60,0],['HyperX','Cloud III',75,90],['SteelSeries','Arctis Nova 7',89,180],['Logitech G','PRO X 2 LIGHTSPEED',96,250]]],
+      ['HyperX','Cloud Stinger 2',60,0],['HyperX','Cloud III',75,90],['SteelSeries','Arctis Nova 7',89,180],['Logitech G','PRO X 2 LIGHTSPEED',96,250],['Sennheiser','GAME ONE',89,150],['Razer','BlackShark V2 Pro',94,210],['Razer','BlackShark V2 X',72,60],['SteelSeries','Arctis Nova Pro Wireless',98,325],['Logitech G','G435',70,70],['Sennheiser','GSP 300',76,85]]],
     ['peripherals','Keyboard and mouse','Clavier et souris',[
       ['Logitech','MK120',60,0],['Razer','Cynosa V2 + DeathAdder Essential',76,90],
-      ['SteelSeries','Apex Pro TKL + Aerox 3',88,220],['Logitech G','PRO X TKL + PRO X SUPERLIGHT 2',96,345]]]
+      ['SteelSeries','Apex Pro TKL + Aerox 3',88,220],['Logitech G','PRO X TKL + PRO X SUPERLIGHT 2',96,345],['HyperX','Alloy Origins + Pulsefire Haste',85,160],['CORSAIR','K70 RGB PRO + SABRE RGB PRO',91,235],['CORSAIR','K55 RGB PRO + HARPOON RGB PRO',73,100],['Logitech','MK295',65,40],['Logitech G','G413 SE + G305',79,115],['Razer','Huntsman V3 Pro TKL + Viper V3 Pro',98,375],['SteelSeries','Apex 3 + Rival 3',73,90],['HyperX','Alloy Core RGB + Pulsefire Core',71,85]]]
   ];
 }
 
@@ -27,6 +27,7 @@ function installSetupGear(engine,catalog) {
     const gap=q-requirement;
     return gap<0 ? -Math.min(7,Math.round(-gap/4)) : Math.min(3,Math.floor(gap/5));
   }
+  engine.rlcEquipmentImpact = modifier;
   const board=engine.facilityBoard;
   engine.facilityBoard=function(state,...args) {
     const output=board.call(this,state,...args);

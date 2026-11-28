@@ -201,7 +201,13 @@ function installMatchOfficials(engine, talk, createRules, io) {
       const player=engine.playerById(simState,pid);
       if (!player) return original;
       const affected=rec[game]?.teamId===player.teamId ? 1 : 0;
-      return (Number(original)||0)+bonus(fixture,player.teamId)-affected;
+      const values=player.rlcAttributes?.values;
+      const specialization=values?.length===8
+        ? (values[0]*1.25+values[1]*1.25+values[2]+values[3]+values[4]*.45+values[5]*1.35+values[6]+values[7]*.70)/8 - player.rating : 0;
+      const attributes=Number.isFinite(specialization) ? Math.max(-2,Math.min(2,specialization*.45)) : 0;
+      const gear=engine.rlcEquipmentImpact?.(team(simState,player.teamId),player) || 0;
+      const form=engine.rlcSimulationFatigue?.(simState,pid) || 0;
+      return (Number(original)||0)+bonus(fixture,player.teamId)-affected+gear+form+attributes;
     },native);
   }
   const originalBoost=engine.talkBoostFor;

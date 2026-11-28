@@ -522,7 +522,8 @@ async function testQuickChatPresets() {
     async () => ({ enabled: true, music: false, bindings: ['demo', 'arbitrary text', 'center'] }), quickChatCatalog);
   publish(dir);
   const config = fs.readFileSync(path.join(dir, 'inventory-quick-chat.tsv'), 'utf8').trimEnd().split('\n');
-  assert.equal(config.length, 9);
+  assert.equal(config.length, 17);
+  assert.equal(config[9], "defend\tDefend?");
   assert.equal(config[1], 'demo\tBump the defender!');
   assert.equal(config[2], 'go\tGo for it!');
   fs.writeFileSync(path.join(dir, 'inventory-timeout.wav'), '');
@@ -672,11 +673,13 @@ testComposure();
   const { installModBadge } = require('./src/version-badge.cjs');
   const badge = { style: {} };
   const hubBadge = { classList: { contains: () => false }, getBoundingClientRect: () => ({ height: 18, bottom: 22 }) };
-  let modifierBadge;
+  let modifierBadge, combined = false;
   const context = {
     window: { addEventListener() {} },
     document: {
-      createElement: () => badge,
+      createElement: tag => tag === 'style' ? {} : badge,
+      head: { appendChild() {} },
+      documentElement: { classList: { toggle: (_, active) => { combined = active; } } },
       querySelector: selector => selector === '.mod-version-label' ? modifierBadge : hubBadge,
       body: { appendChild(node) { node.isConnected = true; } }
     },
@@ -684,11 +687,15 @@ testComposure();
     requestAnimationFrame: callback => callback()
   };
   const run = require('node:vm').runInNewContext('(' + installModBadge.toString() + ')', context);
-  assert.equal(run('0.9.14'), 'installed');
-  assert.equal(badge.textContent, 'Overhaul v0.9.14');
+  assert.equal(run('0.9.15', true, '0.11.5'), 'installed');
+  assert.equal(badge.textContent, 'Overhaul v0.9.15');
   assert.equal(badge.style.top, '26px');
-  modifierBadge = { getBoundingClientRect: () => ({ height: 16, bottom: 42 }) };
+  modifierBadge = { textContent: 'Modifier v0.11.5', getBoundingClientRect: () => ({ height: 16, bottom: 42 }) };
   context.update();
-  assert.equal(badge.style.top, '46px');
-  assert.equal(badge.textContent, 'Overhaul v0.9.14');
+  assert.equal(badge.style.top, '26px');
+  assert.equal(badge.textContent, 'Overhaul v0.9.15 + Modifier v0.11.5');
+  assert.equal(combined, true);
+  const { compareVersions, showVersionNotice } = require('./src/version-check.cjs');
+  showVersionNotice({showMessageBox() { assert.fail('Modifier 0.11.5 should not show an update warning'); }},
+    { isDestroyed: () => false }, '0.9.15', '0.9.14', true, '0.11.5', compareVersions);
 }

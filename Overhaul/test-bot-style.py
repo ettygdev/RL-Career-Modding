@@ -15,7 +15,7 @@ def vec(x, y, z=0):
 def car(name, position, bot=True, team=0):
     return Obj(name=name, player_id=name, is_bot=bot, team=team, air_state=AirState.OnGround,
                demolished_timeout=-1, boost=80, dodge_timeout=1,
-               physics=Obj(location=position, velocity=vec(800, 0), rotation=Obj(yaw=0)))
+               physics=Obj(location=position, velocity=vec(800, 0), rotation=Obj(yaw=0, pitch=0, roll=0), angular_velocity=vec(0,0,0)))
 
 
 zen = car("zen", vec(100, 200, 18))

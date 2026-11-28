@@ -5,7 +5,7 @@ function installSetupGearUi(catalog,logos={}) {
   const target='rlc-equipment';
   const tr=(en,fr)=>/^fr\b/i.test(S?.lang || document.documentElement.lang)?fr:en;
   const label=()=>tr('Equipment','Équipement');
-  let playerId=null, category=catalog[0][0], busy=false, error='';
+  let playerId=null, brandFilter=null, category=catalog[0][0], busy=false, error='';
   const oldHeader=topbarHtml;
   topbarHtml=function(...args) {
     return oldHeader.apply(this,args).replace(/<button\b[^>]*data-action="tab"[^>]*data-tab="inbox"/,match=>
@@ -25,7 +25,11 @@ function installSetupGearUi(catalog,logos={}) {
     const players=setup.players.map(p=>button('player',p.id,p.name,p===player)).join('');
     const tabs=catalog.map(row=>button('category',row[0],tr(row[1],row[2]),row[0]===category)).join('');
     const options=catalog.find(row=>row[0]===category)[3];
-    const cards=options.map(([brand,model,quality,price],index)=>{
+    const brands=[...new Set(options.map(model=>model[0]))].sort((a,b)=>a.localeCompare(b));
+    if (!brands.includes(brandFilter)) brandFilter=brands[0];
+    const brandTabs=brands.map(brand=>button('brand',brand,brand,brand===brandFilter)).join('');
+    const cards=options.map((model,index)=>({model,index})).filter(({model})=>model[0]===brandFilter)
+      .sort((a,b)=>b.model[2]-a.model[2] || a.index-b.index).map(({model:[brand,model,quality,price],index})=>{
       const current=player.choices[category]===index;
       const purchased=player.owned?.[category]?.includes(index);
       const cost=purchased?0:price;
@@ -46,7 +50,7 @@ function installSetupGearUi(catalog,logos={}) {
       '</div></div><span class="sr-budget">'+esc(fmtMoney(setup.budget))+'</span></div><div class="panel-body">'+
       '<div class="ptabs rlc-gear-tabs">'+players+'</div><div class="sr-row"><span>'+esc(tr('Setup impact in matches',
         'Effet du setup en match'))+'</span><b>'+impact+'</b></div><div class="ptabs rlc-gear-tabs">'+tabs+
-      '</div><div class="rlc-gear-grid">'+cards+'</div>'+(error?'<div class="sr-card-sub" role="status">'+esc(error)+'</div>':'')+'</div></div>';
+      '</div><div class="ptabs rlc-gear-tabs" aria-label="Brands">'+brandTabs+'</div><div class="rlc-gear-grid">'+cards+'</div>'+(error?'<div class="sr-card-sub" role="status">'+esc(error)+'</div>':'')+'</div></div>';
   },original,{rlcSetupGear:true});
   document.addEventListener('click',async event=>{
     const button=event.target.closest?.('[data-rlc-gear]');
@@ -55,7 +59,8 @@ function installSetupGearUi(catalog,logos={}) {
     event.stopImmediatePropagation();
     const action=button.dataset.rlcGear,value=button.dataset.value;
     if (action==='player') playerId=Number(value);
-    if (action==='category') category=value;
+    if (action==='category') {category=value;brandFilter=null;}
+    if (action==='brand') brandFilter=value;
     if (action!=='buy') {error='';render();return;}
     const save=S.saveId;
     busy=true;

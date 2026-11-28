@@ -23,7 +23,7 @@ const { installCareerExtras, installCareerSetup } = require('./src/career-extras
 
 const { steamInputRequestFile, requestSteamProxy, runSteamInputProxy } = require('./src/steam-input.cjs');
 
-const { compareVersions, latestCareerRelease, modifierFileVersion, showVersionNotice } = require('./src/version-check.cjs');
+const { installCareerUpdate, compareVersions, latestCareerRelease, modifierFileVersion, showVersionNotice } = require('./src/version-check.cjs');
 
 const { quickChatCatalog, installQuickChat, installQuickChatUi } = require('./src/quick-chat.cjs');
 
@@ -41,7 +41,7 @@ fs.mkdirSync('bin', { recursive: true });
 fs.mkdirSync('.build', { recursive: true });
 const main = path.resolve('.build/launcher.cjs');
 const source = fs.readFileSync('src/launcher.cjs', 'utf8');
-const hooks = [installModBadge, installInventoryEngine, installInventoryUi, createThumbnailLoader, installCameraBridge, createLiquipediaCameraLookup, installPostmatchFrame, installBroadcastResult, showBroadcastResult, installCareerExtras, installCareerSetup, installCoaches, installCoachesUi, installWorldStaff, installWorldStaffUi, coachAudience, coachArchiveKey, installCoachSocial, installComposure, installComposureUi, steamInputRequestFile, requestSteamProxy, runSteamInputProxy, compareVersions, latestCareerRelease, modifierFileVersion, showVersionNotice, installQuickChat, installQuickChatUi, matchOfficialsRules, installMatchOfficials, installMatchOfficialsUi, recruitmentRules, installRecruitment, installRecruitmentUi]
+const hooks = [installModBadge, installInventoryEngine, installInventoryUi, createThumbnailLoader, installCameraBridge, createLiquipediaCameraLookup, installPostmatchFrame, installBroadcastResult, showBroadcastResult, installCareerExtras, installCareerSetup, installCoaches, installCoachesUi, installWorldStaff, installWorldStaffUi, coachAudience, coachArchiveKey, installCoachSocial, installComposure, installComposureUi, steamInputRequestFile, requestSteamProxy, runSteamInputProxy, compareVersions, latestCareerRelease, modifierFileVersion, showVersionNotice, installCareerUpdate, installQuickChat, installQuickChatUi, matchOfficialsRules, installMatchOfficials, installMatchOfficialsUi, recruitmentRules, installRecruitment, installRecruitmentUi]
   .concat(setupGearCatalog,installSetupGear,installSetupGearUi,installRatingDials,installWorldAttributes,installWorldAttributeUi)
   .map(fn => fn.toString()).join('\n');
 fs.writeFileSync(main, source.replace('/* INVENTORY_HOOKS */', () => 'const quickChatCatalog = ' + JSON.stringify(quickChatCatalog) + ';\n' + hooks));

@@ -1,4 +1,8 @@
 #include <Windows.h>
+#include <ShlObj.h>
+#include <regex>
+#include "bakkesmod/wrappers/GameEvent/ReplayDirectorWrapper.h"
+#include "bakkesmod/wrappers/GameEvent/ReplaySoccarWrapper.h"
 #include "intermission-music.h"
 #include "bakkesmod/plugin/bakkesmodplugin.h"
 #include "bakkesmod/plugin/pluginwindow.h"
@@ -122,7 +126,9 @@ public:
         std::weak_ptr<int> life = lifecycle;
         gameWrapper->RegisterDrawable([this, life](CanvasWrapper canvas) {
             if (life.expired()) return;
-            capturePostmatch(gameWrapper->GetGameEventAsServer());
+            auto server = gameWrapper->GetGameEventAsServer();
+            updateReplaySave(server);
+            capturePostmatch(server);
             intermissionMusic.update();
             drawPostmatch(canvas);
             drawSpectatorHud(canvas);
@@ -134,6 +140,9 @@ public:
         });
         gameWrapper->HookEventWithCaller<CarWrapper>(destroyEvent, [this](CarWrapper victim, void*, std::string) {
             captureDemo(victim, nullptr);
+        });
+        gameWrapper->HookEventPost("Function TAGame.ReplayDirector_TA.EventAutoSaveChanged", [this](std::string) {
+            updateReplaySave(gameWrapper->GetGameEventAsServer());
         });
         gameWrapper->HookEvent("Function TAGame.GameEvent_Soccar_TA.StartReplay", [this](std::string) {
             if (!matchToken.empty()) refereeReplayUntil = nowMs() + 8000;
@@ -153,6 +162,7 @@ public:
         syncOfficialsMenu(false);
         setQuickBinds(false);
         cvarManager->removeNotifier("rlc_quick_direction");
+        gameWrapper->UnhookEventPost("Function TAGame.ReplayDirector_TA.EventAutoSaveChanged");
         gameWrapper->UnhookEvent(demoEvent);
         gameWrapper->UnhookEvent(destroyEvent);
         gameWrapper->UnhookEvent("Function TAGame.GameEvent_Soccar_TA.StartReplay");
@@ -233,7 +243,7 @@ private:
     std::string quickSession;
     bool quickEnabled = false, botCalls = false;
     struct QuickChoice { std::string id, label; };
-    std::array<QuickChoice, 8> quickMessages;
+    std::array<QuickChoice, 16> quickMessages;
     static constexpr std::array quickKeys{"XboxTypeS_DPad_Up", "XboxTypeS_DPad_Left",
         "XboxTypeS_DPad_Right", "XboxTypeS_DPad_Down"};
     std::array<std::string, 4> savedQuickBinds;
@@ -306,6 +316,58 @@ private:
     bool f8Was = false, yesWas = false, noWas = false, enterWas = false, decisionSent = false, skipSent = false;
     std::atomic_bool officialsMenuWanted{false}, officialsMenuOpen{false}, officialsMenuSubmitted{false};
     std::string timeoutMenuOriginal, timeoutMenuDisabled;
+    std::string replayToken, replaySavedToken;
+    bool replayRequested = false, replayAutoWas = false, replayKeyWas = false;
+    long long nextReplayTry = 0, nextTimeoutSuppression = 0;
+
+    void updateReplaySave(ServerWrapper server) {
+        const bool key = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
+        const bool pressed = key && !replayKeyWas && GetForegroundWindow() != nullptr;
+        replayKeyWas = key;
+        if (!server || gameWrapper->IsInOnlineGame() || gameWrapper->IsInFreeplay() || gameWrapper->IsInReplay())
+            return;
+        const std::string token = postmatch && !postmatch->hidden && server.GetbMatchEnded()
+            ? postmatch->token : matchToken;
+        if (token.empty() || (serverAddress != server.memory_address && !server.GetbMatchEnded())) return;
+        const auto base = token.substr(0, token.find('.'));
+        if (server.GetbMatchEnded() && replaySavedToken == base) return;
+        auto director = server.GetReplayDirector();
+        if (!director) return;
+        const bool queued = director.GetbAutoSave() != 0;
+        if (base != replayToken) {
+            replayToken = base;
+            replayRequested = false;
+            replayAutoWas = queued;
+            nextReplayTry = 0;
+        }
+        if (!server.GetbMatchEnded() && !server.GetbAllowQueueSaveReplay())
+            server.SetbAllowQueueSaveReplay(1);
+        DWORD ownerPid = 0;
+        GetWindowThreadProcessId(GetForegroundWindow(), &ownerPid);
+        if ((pressed && ownerPid == GetCurrentProcessId()) || queued)
+            replayRequested = true;
+        replayAutoWas = queued;
+        if (!replayRequested || !server.GetbMatchEnded() || nowMs() < nextReplayTry) return;
+        nextReplayTry = nowMs() + 400;
+        auto replay = director.GetReplay();
+        if (!replay || replay.GetNumFrames() < 120) return;
+        wchar_t documents[MAX_PATH]{};
+        if (FAILED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, documents))) return;
+        const auto folder = std::filesystem::path(documents) / "My Games" / "Rocket League" / "TAGame" / "Demos";
+        std::error_code error;
+        std::filesystem::create_directories(folder, error);
+        if (error || base.find_first_not_of("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-") != std::string::npos)
+            return;
+        const auto destination = folder / ("Overhaul-" + base + ".replay");
+        if (std::filesystem::exists(destination, error) || error) return;
+        replay.ExportReplay(destination);
+        const auto bytes = std::filesystem::file_size(destination, error);
+        if (!error && bytes > 256) {
+            replaySavedToken = base;
+            replayRequested = false;
+            cvarManager->log("RLCareer Overhaul: exported career replay " + destination.filename().string());
+        }
+    }
 
     void syncOfficialsMenu(bool wanted) {
         if (officialsMenuWanted.exchange(wanted) == wanted) return;
@@ -329,9 +391,10 @@ private:
             }
             current = std::exchange(timeoutMenuOriginal, {});
         } else {
-            const auto flag = current.find("\"allow\":true");
-            if (flag == std::string::npos) return;
-            current.replace(flag, 12, "\"allow\":false");
+            static const std::regex allowed("\"allow\"[ \t\r\n]*:[ \t\r\n]*true");
+            std::smatch flag;
+            if (!std::regex_search(current, flag, allowed)) return;
+            current.replace(flag.position(), flag.length(), "\"allow\":false");
         }
         const auto staging = directory / "talk" / "inventory-timeout-ok.tmp";
         std::ofstream out(staging, std::ios::trunc);
@@ -456,6 +519,10 @@ private:
         if (issueServer && (!active || now >= issueResume))
             endTechnicalPause(server, active ? officials.recovery : Recovery::Resume);
 
+        if (issueServer && now < issueResume && now >= nextTimeoutSuppression) {
+            nextTimeoutSuppression = now + 100;
+            allowTimeoutButton(false);
+        }
         if (active && !issueServer && requestKey && officials.available && !officials.taken) {
             officialInput(officials.token, "request", "call");
             officials.taken = true;
@@ -988,14 +1055,14 @@ private:
                 quickText = choice.label;
                 quickTextUntil = now + 2900;
             }
-        } else if (direction == 0 || direction == 3) {
+        } else {
             if (!quickEnabled) return;
-            quickGroup = direction == 0 ? 0 : 1;
+            constexpr std::array<int,4> groups{0,2,3,1};
+            const int group=groups[direction];
+            if ((group == 1 && server.GetbBallHasBeenHit()) || quickMessages[group*4].id.empty()) return;
+            quickGroup = group;
             quickMenuUntil = now + 2300;
             tacticUntil = 0;
-        } else {
-            quickGroup = -1;
-            changeTactic(direction == 1 ? -1 : 1);
         }
     }
 
@@ -1021,7 +1088,7 @@ private:
             constexpr float height = 148;
             panel.surface(x, y, width, height);
             panel.box(x, y, width, 27, {19, 29, 40, 255});
-            panel.text(quickGroup == 0 ? "COMM" : "KICK-OFF", x + 13, y, 112, 27, 17);
+            panel.text(std::array<const char*,4>{"ORDERS","KICK-OFF","REQUESTS","SUPPORT"}[quickGroup], x + 13, y, 112, 27, 17);
             panel.text("TEAM QUICK CHAT", x + 137, y, 125, 27, 12, teamHud::muted, true);
             for (unsigned i = 0; i < 4; ++i) {
                 const float row = y + 29 + 28 * i;

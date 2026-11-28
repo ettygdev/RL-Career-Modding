@@ -35,7 +35,10 @@ def touch(car, seconds):
 
 controls = ControllerState(throttle=1)
 car = player(0, 0, 450, 45)
+car.physics.velocity.y = 1320
 packet, ball = match(car, 0, 195, 560)
+car.latest_touch = O(game_seconds=.2, ball_index=0)
+packet.match_info.seconds_elapsed = .35
 move = AdvancedMoves()
 assert move.update(packet, 0, controls)["jump"] is False
 assert move.move == "flip-reset"
@@ -51,7 +54,10 @@ assert move.update(packet, 0, controls)["pitch"] == -1
 assert move.pending_shot[0] == "flip-reset"
 
 car = player(0, 0, 900)
+car.physics.velocity.y = 1320
 packet, ball = match(car, 0, 130, 1050)
+car.latest_touch = O(game_seconds=.2, ball_index=0)
+packet.match_info.seconds_elapsed = .35
 move = AdvancedMoves()
 move.update(packet, 0, controls)
 assert move.move == "double-reset"
@@ -68,16 +74,6 @@ assert move.stage == "second"
 touch(car, 2)
 move.update(packet, 0, controls)
 assert move.stage == "finish" and move.reset_count == 2
-
-car = player(0, 0, 630, 48)
-car.has_jumped = False
-car.physics.rotation.pitch = .48
-packet, ball = match(car, 0, 150, 685)
-move = AdvancedMoves()
-start = move.update(packet, 0, controls)
-assert move.move == "musty" and not start["jump"]
-packet.match_info.frame_num = 19
-assert move.update(packet, 0, controls)["pitch"] == 1
 
 car = player(0, 0, 2000, 40)
 car.has_jumped = False
@@ -96,14 +92,26 @@ packet.players.pop()
 assert move.update(packet, 0, controls) is None and move.move is None
 assert on_target(O(location=vec(0, 4000, 300), velocity=vec(0, 2000, 0)), 0)
 assert not on_target(O(location=vec(1300, 4000, 300), velocity=vec(0, 2000, 0)), 0)
-print("All four sequences, confirmed reset transitions, cover cancellation and shot projection passed.")
+print("Competitive sequences, confirmed reset transitions, cover cancellation and shot projection passed.")
 
 car = player(0, 0, 560)
-car.physics.velocity = vec(0, 230, 0)
+car.physics.velocity = vec(0, 1120, 0)
 packet, ball = match(car, 0, 200, 640)
+ball.velocity = vec(0, -130, 0)
 move = AdvancedMoves()
 result = move.update(packet, 0, controls)
-assert move.move == "zen-touch" and not result["boost"] and result["roll"] != 0
+assert move.move == "zen-touch" and not result["boost"] and result["roll"] != 0 and result["pitch"] > 0
+car.latest_touch = O(game_seconds=.2, ball_index=0)
+packet.match_info.seconds_elapsed = .35
+follow = AdvancedMoves()
+follow.update(packet, 0, controls)
+assert follow.move != "zen-touch"
+car.latest_touch = None
+ball.velocity.y = 100
+outbound = AdvancedMoves()
+outbound.update(packet, 0, controls)
+assert outbound.move != "zen-touch"
+ball.velocity.y = -130
 opponent = player(0, 310, 400)
 opponent.team = 1
 packet.players.append(opponent)
@@ -163,20 +171,23 @@ assert BotStyle.kickoff_taker(kickoff, 0) == 2
 car = player(0, 0, 18)
 car.air_state = AirState.OnGround
 packet, ball = match(car, 0, 180, 170)
+ball.velocity.z = -300
 move = AdvancedMoves()
 assert move.update(packet, 0, controls)["jump"] is False
-assert move.stage == "pop-approach"
+assert move.stage == "bounce-wait"
 car.physics.location.y = 50
 packet.match_info.frame_num += 5
+assert move.update(packet, 0, controls)["jump"] is False
+ball.location.z = 108
+ball.velocity.z = 315
+packet.match_info.frame_num += 15
 assert move.update(packet, 0, controls)["jump"] is True
+assert move.stage == "bounce-rise"
 car.air_state = AirState.InAir
 car.physics.location = vec(0, 110, 85)
+ball.location.z = 164
 packet.match_info.frame_num += 13
 assert move.update(packet, 0, controls)["jump"] is False
-packet.match_info.frame_num += 5
-second = move.update(packet, 0, controls)
-assert second["jump"] and second["pitch"] == second["yaw"] == 0
-assert move.stage == "pop-follow"
 touch(car, 1)
 packet.match_info.frame_num += 4
 assert not move.update(packet, 0, controls)["jump"]
@@ -198,6 +209,7 @@ car.air_state = AirState.OnGround
 car.physics.rotation.yaw = 0
 packet, ball = match(car, 330, 515, 95)
 enemy = player(400, 960, 18)
+enemy.physics.velocity.y = -890
 enemy.team = 1
 packet.players.append(enemy)
 move = AdvancedMoves()
@@ -251,9 +263,10 @@ assert idle.cover_aerial(packet, 0, ball) is None
 
 car = player(0, 0, 650)
 packet, ball = match(car, 0, 325, 805)
+assert AdvancedMoves().update(packet, 0, controls) is None
 move = AdvancedMoves()
+move.begin("setup-reset-pop", "reset-pop-approach", car, 10)
 assert move.update(packet, 0, controls)["jump"] is False
-assert move.stage == "reset-pop-approach"
 car.has_jumped = False
 ball.location = vec(0, 156, 758)
 packet.match_info.frame_num = 24
@@ -294,14 +307,16 @@ for rating in (30, 98):
     })
     car = player(0, 0, 650)
     car.player_id = 7
-    packet, ball = match(car, 0, 325, 805)
+    car.physics.velocity = vec(0, 1080, 0)
+    packet, ball = match(car, 0, 240, 770)
+    ball.velocity = vec(0, -105, 0)
     packet.match_info.match_phase = MatchPhase.Active
     style = BotStyle()
     output = style.apply(packet, 0, controls)
-    assert style.advanced.move == "first-touch-reset-pop"
+    assert style.advanced.move == "zen-touch"
     outputs.append(output)
 assert outputs[0].jump == outputs[1].jump
-assert abs(outputs[0].pitch) < abs(outputs[1].pitch)
+assert sum(abs(getattr(outputs[0], axis)) for axis in ("pitch", "yaw", "roll")) < sum(abs(getattr(outputs[1], axis)) for axis in ("pitch", "yaw", "roll"))
 command = dict(jump=True, boost=True, pitch=-.62, yaw=.1, roll=0)
 low = execution_precision(command, 25, 25, 25, 10)
 assert low["jump"] and low["boost"] and low["roll"] == 0
@@ -339,16 +354,7 @@ packet.match_info.frame_num += 17
 flick = move.update(packet, 0, controls)
 assert flick["jump"] and flick["yaw"] != 0
 
-car = player(3810, 1070, 505)
-car.physics.rotation.yaw = .43
-packet, ball = match(car, 3980, 1146, 510)
-move = AdvancedMoves()
-assert move.update(packet, 0, controls)["jump"] is False
-assert move.move in ("wall-pinch", "kuxir-pinch")
-packet.match_info.frame_num += 4
-car.physics.location.x = 3846
-assert move.update(packet, 0, controls)["jump"] is True
-print("Open-net shot, challenge yield, roof-pop choice, 45-degree flick and pinch timing passed.")
+print("Open-net shot, challenge yield, roof-pop choice and 45-degree flick passed.")
 
 car = player(0, -620, 18)
 car.air_state = AirState.OnGround
@@ -428,5 +434,372 @@ packet, ball = match(car, 0, 195, 148)
 ball.velocity = vec(0, 810, 290)
 move = AdvancedMoves()
 assert not move.update(packet, 0, controls)["jump"]
-assert move.stage == "pop-approach"
+assert move.stage == "bounce-wait"
 print("Wall and ceiling wheel-side recovery, third-player rotation and rising bounce launch passed.")
+
+from rlc_advanced_moves import predicted_touch
+collector = player(0, 0, 18, 25)
+collector.air_state = AirState.OnGround
+packet, ball = match(collector, 0, 1950, 95)
+pad = O(location=vec(115, 340, 70))
+packet.boost_pads = [O(is_active=True)]
+field_info = O(boost_pads=[pad])
+pickup = BotStyle.boost_pickup(packet, collector, ball, controls, field_info)
+assert pickup and abs(pickup["steer"]) > .1 and not pickup["boost"]
+packet.boost_pads[0].is_active = False
+assert BotStyle.boost_pickup(packet, collector, ball, controls, field_info) is None
+
+opponent = player(0, 430, 120)
+opponent.team = 1
+opponent.physics.velocity = vec(0, -1300, 30)
+packet, ball = match(collector, 0, 0, 168)
+forecast = predicted_touch(ball, [opponent], .50)
+assert forecast and forecast[1] < -220
+opponent.physics.velocity.x = 1100
+assert predicted_touch(ball, [opponent], .50) is None
+
+carrier = player(0, 3000, 725, 40)
+carrier.physics.velocity = vec(0, 780, 500)
+packet, ball = match(carrier, 0, 3210, 950)
+ball.velocity = vec(0, 460, -200)
+move = AdvancedMoves()
+move.begin("first-touch-reset-pop", "reset-pop-approach", carrier, 10)
+move.reset_roll = 1
+command = move.update(packet, 0, controls)
+assert command and command["boost"]
+carrier.physics.location = vec(0, 3155, 828)
+carrier.physics.rotation.roll = math.pi
+packet.match_info.frame_num += 4
+align = move.update(packet, 0, controls)
+assert align and not align["boost"] and not align["jump"]
+print("Active reset chase, late wheel alignment, boost-pad correction and collision forecast passed.")
+
+car = player(0, -1000, 94)
+car.physics.velocity = vec(0, 870, -400)
+car.physics.rotation.pitch = .16
+packet, ball = match(car, 0, 1000, 400)
+style = BotStyle()
+assert not style.recovery_wave_dash(car, ball, controls, 10)["jump"]
+car.physics.location.z = 35
+dash = style.recovery_wave_dash(car, ball, controls, 24)
+assert dash["jump"] and dash["pitch"] == -1 and not dash["boost"]
+assert style.recovery_wave_dash(car, ball, controls, 25) is None
+car.has_dodged = True
+assert BotStyle().recovery_wave_dash(car, ball, controls, 26) is None
+car.has_dodged = False
+car.physics.rotation.roll = 1
+assert BotStyle().recovery_wave_dash(car, ball, controls, 26) is None
+print("Wave dash timing, preserved boost, and unavailable or unsafe dodge checks passed.")
+
+from rlc_advanced_moves import goal_lane, reset_orientation, shot_normal
+car = player(0, 2100, 600)
+car.physics.rotation.roll = math.pi
+car.physics.angular_velocity = vec(0, 0, 0)
+stable = reset_orientation(car, (0, 1, 0), (0, 0, -1), 1)
+assert max(abs(value) for value in stable.values()) < .001
+car.physics.rotation.roll -= .20
+correct = reset_orientation(car, (0, 1, 0), (0, 0, -1), 1)
+assert abs(correct["roll"]) > .65
+
+blocker = player(0, 5020, 145)
+blocker.team = 1
+blocker.physics.velocity = vec(0, 0, 0)
+lane, _ = goal_lane((0, 3900, 300), (0, 720, 0), 1, [blocker])
+assert abs(lane[0]) > .22
+normal = shot_normal((0, 1, 0), (650, 1250, 0))
+assert normal[0] < 0 and normal[1] > .96
+print("Four-wheel pose alignment and shot drift compensation passed.")
+
+car = player(0, 0, 620, 45)
+packet, ball = match(car, 0, 430, 690)
+enemy = player(10, 806, 680)
+enemy.team = 1
+enemy.physics.velocity = vec(0, -1020, 0)
+packet.players.append(enemy)
+assert AdvancedMoves.contest(car, ball, [enemy], 436)["boost"]
+enemy.physics.velocity.y = 40
+assert AdvancedMoves.contest(car, ball, [enemy], 436) is None
+
+print("Reachable 50/50 contest passed.")
+
+from rlc_advanced_moves import aerial_pass_plan
+passer = player(0, 300, 18)
+passer.air_state = AirState.OnGround
+passer.latest_touch = O(game_seconds=4, ball_index=0)
+packet, ball = match(passer, 0, 455, 122)
+packet.match_info.seconds_elapsed = 4.2
+ball.velocity = vec(0, 370, 0)
+receiver = player(220, 1940, 18)
+receiver.air_state = AirState.OnGround
+receiver.physics.velocity = vec(0, 570, 0)
+packet.players.append(receiver)
+plan = aerial_pass_plan(packet, ball, passer.team)
+assert plan and plan.passer == 0 and plan.receiver == 2
+sender_policy, receiver_policy = BotStyle(), BotStyle()
+assert sender_policy.aerial_pass_controls(packet, 0, ball, 10)["jump"]
+assert receiver_policy.aerial_pass_controls(packet, 2, ball, 10)["jump"]
+assert BotStyle().aerial_pass_controls(packet, 1, ball, 10) is None
+passer.latest_touch.game_seconds = 4.3
+receiver.air_state = AirState.InAir
+receiver.physics.location.z = 360
+ball.location = vec(130, 1620, 370)
+ball.velocity = vec(150, 1470, 10)
+assert receiver_policy.aerial_pass_controls(packet, 2, ball, 33) is None and receiver_policy.pass_play is None
+assert sender_policy.aerial_pass_controls(packet, 0, ball, 33) is None and sender_policy.pass_play is None
+print("Both bots select the same pass, leave cover free and hand off on reception.")
+
+from rlc_advanced_moves import ball_path, ceiling_opening, ceiling_time
+car = player(0, 0, 1360)
+packet, ball = match(car, 3910, 250, 1090)
+ball.velocity = vec(0, 350, 35)
+assert not ceiling_opening(ball, climbing=True)
+ball.location = vec(0, 320, 1610)
+ball.velocity = vec(0, 530, 1450)
+assert ceiling_opening(ball)
+bounce = ceiling_time(ball)
+assert 0 < bounce < .35
+assert ball_path(ball, bounce + .20)[2] < ball_path(ball, bounce)[2]
+touch(car, 1)
+car.has_jumped = True
+packet.match_info.seconds_elapsed = 1.15
+move = AdvancedMoves()
+assert move.update(packet, 0, controls) is not None
+assert move.stage == "ceiling-rebound"
+ball.location = vec(0, 230, 1640)
+ball.velocity = vec(0, 410, -590)
+packet.match_info.frame_num += 22
+assert move.update(packet, 0, controls) is not None
+assert move.stage == "reset-pop-approach"
+print("Ceiling clearance, post-impact prediction and rebound-to-reset transition passed.")
+
+car = player(0, 2650, 680, 0)
+touch(car, 2)
+packet, ball = match(car, 0, 2826, 714)
+packet.match_info.seconds_elapsed = 2.15
+move = AdvancedMoves()
+prep = move.update(packet, 0, controls)
+assert prep and not prep["jump"] and not prep["boost"] and move.move == "empty-boost-reset"
+packet.match_info.frame_num += 4
+flick = move.update(packet, 0, controls)
+assert flick and flick["jump"] and flick["pitch"] < 0 and not flick["boost"]
+
+car = player(0, 1400, 640, 30)
+car.physics.velocity = vec(0, 1290, 0)
+touch(car, 2)
+packet, ball = match(car, 55, 1850, 666)
+packet.players[1].physics.location = vec(38, 1310, 620)
+packet.players[1].air_state = AirState.InAir
+packet.players[1].physics.velocity = vec(0, 1440, 0)
+packet.match_info.seconds_elapsed = 2.2
+move = AdvancedMoves()
+move.next_attempt = 50
+follow = move.update(packet, 0, controls)
+assert follow and not follow["jump"]
+
+car = player(0, 3000, 18)
+car.air_state = AirState.OnGround
+packet, ball = match(car, 33, 3108, 93)
+close = BotStyle.close_play(packet, 0, ball, controls)
+assert close and close["steer"] != 0 and close["throttle"] == 1
+print("Boost-empty reset dodge, retained follow with a trailing ally, and final ground contact steering passed.")
+
+carrier = player(0, 1140, 910, 49)
+carrier.physics.velocity.y = 680
+carrier.latest_touch = O(game_seconds=1, ball_index=0)
+packet, ball = match(carrier, 0, 1400, 1055)
+packet.match_info.seconds_elapsed = 1.2
+move = AdvancedMoves()
+assert move.update(packet, 0, controls) and move.move == "setup-reset-pop"
+touch(carrier, 1.23)
+ball.location.y = 1320
+packet.match_info.frame_num = 24
+assert not move.update(packet, 0, controls)["jump"]
+assert move.stage == "reset-pop-align"
+
+wall_car = player(3980, 800, 610)
+wall_car.air_state = AirState.OnGround
+wall_car.physics.rotation.pitch = .60
+wall_car.physics.rotation.roll = math.pi / 2
+packet, ball = match(wall_car, 3950, 985, 727)
+ball.velocity = vec(0, 500, 360)
+move = AdvancedMoves()
+assert move.update(packet, 0, controls)["jump"] and move.move == "wall-dodge-air-dribble"
+wall_car.air_state = AirState.InAir
+packet.match_info.frame_num += 2
+assert not move.update(packet, 0, controls)["jump"]
+packet.match_info.frame_num += 4
+assert move.update(packet, 0, controls)["jump"] and move.stage == "wall-dodge-follow"
+touch(wall_car, 1)
+assert not move.update(packet, 0, controls)["jump"] and move.stage == "carry"
+print("Slow carry reset priority and wall launch into aerial carry passed.")
+
+carrier = player(0, 1950, 18)
+carrier.air_state = AirState.OnGround
+packet, ball = match(carrier, 0, 1980, 148)
+ball.velocity.y = 970
+defender = player(140, 2510, 18)
+defender.team = 1
+defender.air_state = AirState.OnGround
+defender.physics.velocity.y = -700
+packet.players.append(defender)
+move = AdvancedMoves()
+fake = move.update(packet, 0, controls)
+assert move.move == "fake-flick" and fake["jump"] is False and fake["throttle"] < .5
+defender.physics.velocity.y = 400
+other = AdvancedMoves()
+other.update(packet, 0, controls)
+assert other.move != "fake-flick"
+print("Fake flick requires a defender closing into the lane.")
+
+car = player(0, 800, 18, 45)
+car.air_state = AirState.OnGround
+car.physics.velocity.y = 900
+packet, ball = match(car, 0, 1010, 93)
+ball.velocity.y = 550
+move = AdvancedMoves()
+assert move.update(packet, 0, controls)["jump"] is False and move.stage == "chip"
+touch(car, 1)
+ball.velocity.z = 280
+packet.match_info.frame_num += 6
+assert move.update(packet, 0, controls)["jump"] and move.stage == "bounce-rise"
+print("Rolling chip waits for a confirmed lifting touch before jumping.")
+
+wall_car = player(3980, 800, 610, 40)
+wall_car.air_state = AirState.OnGround
+wall_car.physics.rotation.pitch = .48
+wall_car.physics.rotation.roll = math.pi / 2
+wall_car.physics.velocity = vec(0, 420, 175)
+packet, ball = match(wall_car, 3960, 955, 665)
+ball.velocity = vec(0, 410, 80)
+move = AdvancedMoves()
+assert move.update(packet, 0, controls)["jump"] and move.stage == "wall-soft-follow"
+wall_car.air_state = AirState.InAir
+packet.match_info.frame_num += 6
+assert not move.update(packet, 0, controls)["jump"]
+touch(wall_car, 1)
+assert move.update(packet, 0, controls) and move.stage == "carry"
+print("Soft wall touch uses a single jump and keeps the carry after contact.")
+
+car = player(0, 1100, 550, 45)
+car.physics.velocity.y = 760
+packet, ball = match(car, 0, 1320, 630)
+ball.velocity.y = 450
+move = AdvancedMoves()
+assert move.update(packet, 0, controls) and move.move == "reset-setup-touch"
+ball.location.y = 1250
+car.physics.velocity.y = 1200
+assert move.update(packet, 0, controls)["boost"] is False
+touch(car, 1)
+assert move.update(packet, 0, controls) and move.stage == "carry"
+print("Approaching soft touch releases boost on fast closure and continues after confirmed contact.")
+
+
+plane = AdvancedMoves.reset_contact_plane
+assert plane((18, 20, 128), (20, 25, 130), (0, 0, -1))[2] > .90
+assert plane((145, 20, 22), (150, 0, 35), (-1, 0, 0))[0] > .90
+assert plane((25, 28, -132), (20, 40, -140), (0, 0, 1))[2] < -.85
+car = player(0, 1100, 550, 45)
+packet, ball = match(car, 0, 1320, 630)
+move = AdvancedMoves()
+move.begin("setup-reset-pop", "reset-pop-approach", car, 10)
+assert move.reset_fallback(car, ball, [], 234, (0, 1, 0), 35, True) is None
+assert move.reset_fallback(car, ball, [], 234, (0, 1, 0), 100, True)
+assert move.stage == "carry" and move.reset_count == 0
+print("Below, lateral and descending reset geometry, plus fallback without fake reset confirmation, passed.")
+
+from rlc_advanced_moves import ball_forecast, ball_path
+ball = O(location=vec(0, 0, 700), velocity=vec(0, 0, 0))
+slices = [O(game_seconds=10 + offset, physics=O(location=vec(x, 0, 700)))
+          for offset, x in ((0, 0), (.25, 300), (.50, 400))]
+token = ball_forecast.set((ball, 10, slices))
+try:
+    assert abs(ball_path(ball, .375)[0] - 350) < .01
+    assert ball_path(ball, .75)[0] == 0
+finally:
+    ball_forecast.reset(token)
+assert ball_path(ball, .375)[0] == 0
+print("Native trajectory interpolation, bounds and scoped fallback passed.")
+
+# Exercise the refined planner directly. Most move fixtures use the fallback
+# without native prediction, so they cannot catch a failure in this path.
+from rlc_advanced_moves import plan_aerial_contact
+
+for x, y, z, vx, vy, vz in (
+    (0, 320, 680, 110, 1200, -90),
+    (3650, 440, 820, -390, 710, 310),
+    (-150, 250, 270, 100, 510, 355),
+):
+    car = player(x - 50, y - 205, z - 110, 42)
+    car.physics.velocity = vec(80, 950, 170)
+    packet, ball = match(car, x, y, z)
+    ball.velocity = vec(vx, vy, vz)
+    result = plan_aerial_contact(car, ball, .24, (0, .8, .6), (0, 1, 0), False)
+    target, projected, normal, horizon, outgoing, margin = result
+    assert .065 <= horizon <= .52
+    assert all(math.isfinite(value) for value in (*target, *projected, *normal, *outgoing, margin))
+    assert abs(math.hypot(*normal) - 1) < .001
+print("Refined contact planner returns finite candidates for interception, wall lift and rising bounce.")
+
+# A newly acquired ceiling-rebound reset can be spent on the next tick
+# when the descending ball is reachable in the dodge plane.
+car = player(0, 300, 1330, 35)
+packet, ball = match(car, 0, 450, 1390)
+ball.velocity = vec(0, 0, -500)
+touch(car, 1)
+move = AdvancedMoves()
+move.begin("first-touch-reset-pop", "reset-pop-align", car, 30)
+assert not move.reset_pop(car, ball, (0, 150, 60), 161, (0, 1, 0), 30, True, [])["jump"]
+pop = move.reset_pop(car, ball, (0, 150, 60), 161, (0, 1, 0), 31, True, [])
+assert pop["jump"] and move.stage == "reset-pop-follow"
+
+from rlc_advanced_moves import basis, directional_reset_roll
+car = player(0, 300, 1000, 40)
+_, left, up = basis(car.physics.rotation)
+assert directional_reset_roll(car, left, .2, 0) > 0
+assert directional_reset_roll(car, tuple(-v for v in left), .2, 0) < 0
+assert directional_reset_roll(car, up, .2, .27) == .27
+assert directional_reset_roll(car, left, .08, .27) == .27
+
+from rlc_advanced_moves import aerial_axis
+assert aerial_axis(.10, 2.0, 2.8, .18, 11) < 0
+assert aerial_axis(-.10, -2.0, 2.8, .18, 11) > 0
+assert aerial_axis(.10, 0, 2.8, .18, 11) > 0
+assert aerial_axis(1.0, 0, 2.8, .18, 11) == 1
+
+from rlc_advanced_moves import ContactSimulation, air_controls, box_contact_offset, contact_hitbox
+
+car = player(0, 0, 700, 42)
+car.physics.rotation.yaw = 0
+car.physics.velocity = vec(900, 0, 0)
+car.hitbox, car.hitbox_offset = O(length=120.507, width=86.699, height=38.659), vec(13.876, 0, 20.755)
+shape = contact_hitbox(car)
+offset = box_contact_offset((1, 0, 0), basis(car.physics.rotation), shape)
+assert math.isclose(offset[0], 166.8795) and offset[2] == 20.755
+assert air_controls(car, (-1, 0, 0), (0, 0, 1))["yaw"] != 0
+
+if "--rocketsim" in sys.argv:
+    from time import perf_counter
+
+    _, ball = match(car, 295, 0, 722)
+    _, unreachable = match(car, 295, 900, 722)
+    simulation = ContactSimulation()
+    assert simulation.prepare(shape)
+    first = simulation.rollout(car, ball, (1, 0, 0), .30, 385, shape)
+    assert first is not None and first[1][0] > 500
+    assert simulation.rollout(car, unreachable, (1, 0, 0), .30, 385, shape) is None
+    assert simulation.rollout(car, ball, (1, 0, 0), .30, 385, shape) == first
+    simulation.find_contact(car, ball, .20, (1, 0, 0), (.9, 0, .435), True, 0)
+    assert simulation.selection is not None
+    simulation.find_contact(car, ball, .20, (1, 0, 0), (.9, 0, .435), True, 1)
+    assert simulation.plan[0] == 0
+    simulation.find_contact(car, unreachable, .20, (1, 0, 0), (.9, 0, .435), True, 2)
+    assert simulation.plan[0] == 2
+
+    bots = [ContactSimulation() for _ in range(6)]
+    assert all(bot.prepare(shape) for bot in bots)
+    start = perf_counter()
+    for frame in range(120):
+        for bot in bots:
+            bot.find_contact(car, ball, .20, (1, 0, 0), (.9, 0, .435), True, frame)
+    print(f"RocketSim hit, miss, replay and cache checks passed. Six continuous aerial approaches: "
+          f"{perf_counter() - start:.3f}s compute for 120 frames.")

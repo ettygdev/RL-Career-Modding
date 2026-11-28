@@ -1,43 +1,54 @@
 # RLCareer Overhaul
 
-RLCareer Overhaul is Ettyg99’s Windows mod for **RL Career Hub**. It expands club management, changes how career bots play and adds a broadcast-style presentation for played and spectated series.
+RLCareer Overhaul is Ettyg99’s Windows mod for **RL Career Hub**. Manage club staff and player development, outfit your team, and play or watch career series with a broadcast presentation and updated bot gameplay.
 
-[Download v0.9.14](https://github.com/ettygdev/RL-Career-Modding/releases/tag/v0.9.14) · [Watch the Hub tour and full BO7](https://youtu.be/x7Wgc_EX07s) · [What changed since v0.3.12](docs/releases/v0.9.14.md) · [Source code](Overhaul/) · [License](LICENSE)
+[Download v0.10.2](https://github.com/ettygdev/RLCareer-Overhaul/releases/tag/v0.10.2) · [Full changelog](docs/releases/v0.10.2.md) · [Hub tour and full BO7](https://youtu.be/x7Wgc_EX07s) · [Source and build guide](Overhaul/) · [MIT License](LICENSE)
 
 ## Install and launch
 
-1. Install RL Career Hub and complete its Rocket League, BakkesMod and RLBot setup.
-2. Download **RLCareer-Overhaul.exe** from Releases. It is the single installer-free download and includes the match integration.
-3. Place the file beside **RL Career Hub.exe**, then start your career through **RLCareer-Overhaul.exe**. The launcher installs the required local RLBot hooks and loads the included BakkesMod plugin when a career match is prepared.
-4. Check for **Overhaul v0.9.14** in the Hub. Restart Rocket League if it was already running and the overlays do not appear.
+1. Complete the Rocket League, BakkesMod and RLBot setup in RL Career Hub.
+2. Close the Hub and download **RLCareer-Overhaul.exe** from Releases.
+3. Place it beside **RL Career Hub.exe** and replace any older copy with the same name. Launch **RLCareer-Overhaul.exe**. The executable includes the match integration.
+4. Check for **Overhaul v0.10.2** in the Hub. Restart Rocket League if it was already running when you updated the mod.
 
-This release targets **Windows x64** and **RL Career Hub 0.2.0-beta.33**. It can start the Hub on its own or alongside **FilstaNet Modifier 0.11.4**, when the Modifier is installed beside the Hub. The Hub, Rocket League and the optional Modifier are separate products. Existing careers receive the new career data when loaded.
+The launcher supports **Windows x64** and Hub **0.2.0-beta.33** and **0.2.0-beta.34**. The beta.34 startup and Quick Chat hook installation were verified locally. Career and match behavior on beta.34 still needs in-game validation. The launcher can detect FilstaNet Modifier beside the Hub and show its installed version in a shared badge. Modifier **0.11.5** is a previously validated compatibility target.
 
-If you used the previous Career+ launcher, switch to the new executable. For an Epic installation using the optional Steam Input proxy, edit the existing non-Steam entry's target to point to the new executable and keep `--steam-input-proxy` in its launch options. In **Setup → Steam Input**, import the entry’s Steam shortcut if it needs to be linked again.
+Existing careers receive the new player data when loaded. The launcher keeps a fixed filename, so shortcuts that point to it can be reused. Epic players using a non-Steam shortcut can configure the Steam Input proxy in **Settings → RLCareer Overhaul**.
 
 ## Club management
 
-- **Player profiles and scouting.** Player cards show Overall, Composure and eight attributes covering attack, defense, mechanics, passing, bumps, game sense, ball control and communication. Scout players outside your club to reveal their ratings. You can hire and manage up to three scouts. Scout quality affects report precision and turnaround, and older reports can be refreshed.
-- **Coaches and mental training.** Search for and sign coaches during transfer windows. Coaches can affect training and composure and recommend tactical timeouts. Mental training improves composure gradually. Composure helps players manage pressure in important matches.
-- **Equipment and facilities.** Buy and equip individual setups using the club budget. PCs, monitors, controllers, headsets and peripherals affect player performance in the simulation. Facilities have Wi-Fi reliability and optional monthly subscriptions that affect the risk of technical issues in online events.
-- **World Editor.** Set player attributes and composure when creating players, and create custom coaches. Overall is calculated from the eight attributes.
-- **Garage and inventory.** Buy and equip cosmetics, browse owned items, switch titles and optionally apply custom car colors through BakkesMod. The club budget pays for purchases.
+| Feature | What you can do |
+| --- | --- |
+| Player ratings | See Overall, Composure, Attack, Defense, Mechanics, Passing, Bumps, Game Sense, Ball Control and Communication. Overall is calculated from the eight attributes. |
+| Scouting | Hire and manage up to three scouts independently of transfer windows. Assign reports to reveal external ratings. Scout ability affects precision, turnaround and potential assessment. |
+| Coaching | Search and sign coaches during transfer windows. Coaches influence training and Composure and can propose timeouts. Coach profiles can have a bio, followers and posts in the Hub’s social world. |
+| Training | Open a player’s training card and choose up to three technical exercises per week. Each targets a specific attribute and uses the Hub’s progression curve. Mental training develops Composure separately. |
+| Equipment | Spend club funds on controllers, monitors, PCs, headsets and peripherals per player. Browse brands and compare models by rating. Equipment quality can affect player performance. |
+| Facilities | Evaluate the facility’s Wi-Fi reliability and choose a paid monthly connection plan. Connection reliability affects the risk of incidents in online matches. |
+| World Editor | Create players with individual attributes and Composure, and add custom coaches. |
 
-## On the field
+## Inventory and titles
 
-- **Bot mechanics and coordination.** Bots can take assigned kickoff roles, cover teammates, rotate out of crowded plays and recover onto the floor, walls or ceiling. Depending on the situation they may attempt air dribbles, flicks, flip resets, double taps, pinches, aerial passes and other mechanics. Ratings affect control precision. Fatigue, pressure, composure and equipment can influence performance.
-- **Optional Team Quick Chat.** Configure preset team and kickoff messages in the Hub. Bots can react to calls such as *I got it*, *Go for it* and *Center*, and send their own play calls. The feature can be switched off in the Hub.
-- **Broadcast presentation.** Watch with a spectator HUD featuring team logos, score, overtime and series status, live boost, player statistics and event indicators. Pro camera settings are used where available. Played matches use a compact scoreboard. Between games, the post-match screen shows the stats, series progress and a countdown with music.
-- **Match officials and timeouts.** Eligible series support tactical timeouts requested by the player or proposed by a coach. Online events can have referee-managed technical pauses tied to facility connection reliability.
+Buy game cosmetics with club funds, browse owned items, and equip compatible painted variants. Set custom car colors and enable them per preset through the included BakkesMod integration. Select an owned player title or use titles awarded through career results. The catalogue covers future RLCS seasons and repeat World Champions. Item previews use cached thumbnails when available.
 
-Mechanical attempts vary by match situation, and bot execution is still being tuned. If you find an issue, include your Hub and Modifier versions and say whether you were playing or spectating. A replay, screenshot or showcase timestamp helps.
+## Playing and watching matches
 
-## Source and maintenance
+- **Broadcast presentation.** A compact scoreboard for played matches. The spectator layout adds team crests, event and stage details, series wins, overtime, player boosts, event pictograms and a tracked-player stats panel. Pro camera settings apply where a profile is available.
+- **Intermissions.** See the score, overtime duration, MVP and player stats after a game, including the series finale. The intermission includes music and a countdown, and can cover loading between games.
+- **Match officials.** Request a tactical timeout in eligible series. Coaches can propose one for your confirmation, and opponents can call their own. Online technical pauses can lead to a resumption, a kickoff or a restart. Timeouts and technical pauses have their own presentation.
+- **Team Quick Chat.** Configure preset messages on the D-pad, disable individual categories or turn the feature off. Bots can respond to team calls and announce plays, including kickoffs, challenges, rotations, defensive coverage and bumps.
+- **Bot play.** Career bots retain their native policies and use additional logic for kickoff roles, first touches, carries, ground and wall setups, passes, redirects, double taps, flip resets, ceiling plays and recoveries. Performance varies with player attributes, Composure, pressure, fatigue and equipment. Mechanical execution and frequency vary by situation.
+- **Simulated fixtures.** Career simulation accounts for player attributes and club effects, including staff, equipment and facilities where applicable.
+- **Replays.** The match integration can capture the native save request for export at match end. F9 remains available as a fallback. Native export can depend on the Rocket League build.
 
-The [Overhaul source folder](Overhaul/) includes the launcher, Hub integration, overlay plugin, bot logic and build and test scripts. See the [build guide](Overhaul/README.md). The version history keeps the earlier Y Social work available for reference. The current release focuses on career management, match presentation and bots.
+## Settings, updates and support
 
-This mod is actively maintained by **Ettyg99**. Fixes, balancing changes and new features will continue to arrive.
+Settings has a dedicated Overhaul section. The Hub’s main menu includes an expandable changelog. The launcher checks GitHub for updates and can install a newer release when you approve it. Restart the Hub from its own executable to use the base UI. Run Overhaul with `--restore-bot-hooks` to restore the native RLBot hooks as well.
 
-## License
+For a bug report, include the Hub, Overhaul and Modifier versions, and whether the match was played or spectated. A replay or screenshot helps identify the issue.
 
-Original RLCareer Overhaul source code is available under the [MIT License](LICENSE). You can use, edit, fork and republish it, including modified versions, provided you retain the copyright credit to **Ettyg99** and the license notice in copies or substantial portions. Third-party software and media retain their own terms. See [Third-party notices](Overhaul/THIRD-PARTY.md).
+## Source, credit and maintenance
+
+The [Overhaul source](Overhaul/) includes the launcher, Hub integration, overlay plugin, bot logic, build scripts and tests. The release tag identifies the source snapshot. Experimental PPO training and its checkpoints are outside the released career mod.
+
+**Ettyg99** maintains RLCareer Overhaul. Updates will continue to include fixes, balance changes and new features as they are ready. You can use, edit and republish the original source under the [MIT License](LICENSE), provided you retain Ettyg99’s copyright credit and the license notice. Third-party components and media retain their own terms. See the [third-party notices](Overhaul/THIRD-PARTY.md).

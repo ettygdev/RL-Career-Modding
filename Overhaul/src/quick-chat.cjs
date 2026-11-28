@@ -1,11 +1,17 @@
 'use strict';
 
 const quickChatCatalog = [
-  { name: 'Comm', opener: '↑', options: [
-    ['got', 'I got it!'], ['go', 'Go for it!'], ['center', 'Center!'], ['leave', 'Leave it!'], ['demo', 'Bump the defender!']
+  { name: 'Orders', opener: '↑', options: [
+    ['got','I got it!'], ['go','Go for it!'], ['center','Go center!'], ['leave','Leave it!'], ['demo','Bump the defender!']
   ] },
   { name: 'Kick-off', opener: '↓', options: [
-    ['got', 'I got it!'], ['go', 'Go for it!'], ['hold', 'Stay back!'], ['follow', 'Cheat up!'], ['boost', 'Grab boost!']
+    ['got','I got it!'], ['go','Go for it!'], ['hold','Stay back!'], ['follow','Cheat up!'], ['boost','Grab boost!']
+  ] },
+  { name: 'Requests', opener: '←', options: [
+    ['defend','Defend?'], ['attack','Attack?'], ['receive','Center?'], ['pass-mid','Pass mid?'], ['pass','Pass?']
+  ] },
+  { name: 'Support', opener: '→', options: [
+    ['rotate','Rotate back?'], ['receive','Center?'], ['pass','Pass?'], ['defend','Defend?']
   ] }
 ];
 
@@ -19,6 +25,7 @@ async function installQuickChat(engine, curtain, fs, path, getPreferences, catal
     if (!input || typeof input !== 'object') return;
     config.enabled = input.enabled === true;
     config.botCalls = input.botCalls !== false;
+    config.groups = catalog.map((_, index) => input.groups?.[index] ?? true);
     config.bindings = catalog.flatMap((category, group) => category.options.slice(0, 4).map((fallback, direction) =>
       category.options.find(([id]) => id === input.bindings?.[group * 4 + direction]) || fallback));
   }
@@ -36,7 +43,7 @@ async function installQuickChat(engine, curtain, fs, path, getPreferences, catal
     try {
       write(directory, 'inventory-quick-chat.tsv', [
         [token, Number(config.enabled), Number(config.botCalls), Date.now() + 7200000].join(' '),
-        ...config.bindings.map(pair => pair.join('\t')), ''
+        ...config.bindings.map((pair,index) => config.groups[Math.floor(index/4)] ? pair.join('\t') : '\t'), ''
       ].join('\n'));
     } catch { /* Optional local integration. */ }
   }
@@ -118,8 +125,9 @@ function installQuickChatUi(catalog) {
     const names = ['Up', 'Left', 'Right', 'Down'];
     const groups = catalog.map((category, group) =>
       '<fieldset class="rlc-qc-group"><legend><kbd class="rlc-qc-key">' + category.opener + '</kbd>' + category.name +
-      '</legend><p class="rlc-qc-hint">Press ' + (group ? 'D-pad Down during kickoff' : 'D-pad Up during play') +
-      ' to open, then pick a direction.</p>' + arrows.map((arrow, i) => {
+      '</legend><label><input type="checkbox" name="group'+group+'"'+
+      ((data.groups?.[group] ?? true)?' checked':'')+'> Enable this category</label>'+
+      '<p class="rlc-qc-hint">Press '+category.opener+' to open, then pick a direction.</p>' + arrows.map((arrow, i) => {
         const slot = group * 4 + i;
         const chosen = category.options.some(([id]) => id === data.bindings?.[slot]) ?
           data.bindings[slot] : category.options[i][0];
@@ -133,7 +141,7 @@ function installQuickChatUi(catalog) {
       '<label><input name="enabled" type="checkbox"' + (data.enabled ? ' checked' : '') + '> Enable team coordination</label>' +
       '<label><input name="botCalls" type="checkbox"' + (data.botCalls !== false ? ' checked' : '') +
       '> Bot callouts</label></div></div>' + '<div class="rlc-qc-grid">' + groups + '</div>' +
-      '<p class="rlc-qc-hint">Left and Right adjust bot aggression while the menu is closed.</p>' +
+      '<p class="rlc-qc-hint">All four directions are reserved for Quick Chat. Kick-off calls are available before the first touch.</p>' +
       '<div class="rlc-qc-footer"><button class="btn primary" type="submit">Save settings</button>' +
       '<span role="status"></span></div></form></div></section>';
   };
@@ -142,7 +150,8 @@ function installQuickChatUi(catalog) {
     event.preventDefault();
     const form = event.target, values = new FormData(form);
     const settings = { enabled: values.has('enabled'), botCalls: values.has('botCalls'),
-      bindings: Array.from({ length: 8 }, (_, i) => values.get('slot' + i)) };
+      groups: catalog.map((_,i)=>values.has('group'+i)),
+      bindings: Array.from({ length: catalog.length*4 }, (_, i) => values.get('slot' + i)) };
     localStorage.setItem(key, JSON.stringify(settings));
     try {
       await window.hub.setDayNote({ day: 'rlc-quick-chat/v1', text: JSON.stringify(settings) });

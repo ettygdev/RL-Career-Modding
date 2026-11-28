@@ -6,6 +6,25 @@ function createThumbnailLoader(send, fetcher = fetch) {
   const queue = [];
   let active = 0;
   const limit = 256 * 1024;
+  let garageCatalog;
+  function normalize(value) {
+    return String(value ?? '').replace(/^\(Alpha Reward\)\s*/i, '').replace(/\s*\(Alpha Reward\)$/i, '').trim().toLowerCase();
+  }
+  async function fallbackUrl(product, options) {
+    if (!garageCatalog) {
+      garageCatalog = fetcher('https://raw.githubusercontent.com/kaiserdj/rl-garage-assets/main/output/data.json', options)
+        .then(response => response.ok ? response.json() : Promise.reject(new Error('Catalog unavailable')))
+        .catch(() => { garageCatalog = undefined; return []; });
+    }
+    const name = normalize(product.name ?? product.Product);
+    const category = normalize(product.category ?? product.Slot);
+    const sameName = (await garageCatalog).filter(item => normalize(item.name) === name &&
+      /^https:\/\/rocket-league\.com\/content\/media\/items\/avatar\/220px\/[a-z0-9]+\.png$/i.test(item.src || ''));
+    const sameCategory = sameName.filter(item => normalize(item.Type) === category);
+    const matches = sameCategory.length ? sameCategory : sameName;
+    const urls = [...new Set(matches.map(item => item.src))];
+    return urls.length === 1 ? urls[0] : '';
+  }
   async function download(id) {
     let paints = null;
     try {
@@ -16,8 +35,11 @@ function createThumbnailLoader(send, fetcher = fetch) {
       if (Number(json.id ?? json.ID) !== id) return { image: '', paints };
       if (json.Paintable === false) paints = [];
       else if (Array.isArray(json.Paints)) paints = json.Paints.map(paint => paint.label).filter(label => typeof label === 'string');
-      if (!/^\/thumbnails\/[a-z0-9_-]+\.png$/i.test(json.thumbnail_url)) return { image: '', paints };
-      const response = await fetcher(origin + json.thumbnail_url, options);
+      const url = /^\/thumbnails\/[a-z0-9_-]+\.png$/i.test(json.thumbnail_url)
+        ? origin + json.thumbnail_url
+        : json.thumbnail_url == null && (json.name || json.Product) ? await fallbackUrl(json, options) : '';
+      if (!url) return { image: '', paints };
+      const response = await fetcher(url, { ...options, signal: AbortSignal.timeout(6000) });
       if (!response.ok || !/^image\/png\b/i.test(response.headers.get('content-type') || '') ||
           Number(response.headers.get('content-length')) > limit || !response.body) return { image: '', paints };
       const parts = [];
@@ -34,11 +56,33 @@ function createThumbnailLoader(send, fetcher = fetch) {
       return { image: '', paints };
     }
   }
+  async function load(id) {
+    if (fetcher !== fetch || !Number.isSafeInteger(id) || id < 0) return download(id);
+    const fs = require('fs').promises;
+    const path = require('path');
+    const directory = path.join(process.env.LOCALAPPDATA || require('os').tmpdir(), 'RLCareer-Overhaul', 'thumbnails');
+    const file = path.join(directory, id + '.json');
+    try {
+      const record = JSON.parse(await fs.readFile(file, 'utf8'));
+      if (typeof record.image === 'string' && record.image.startsWith('data:image/png;base64,iVBOR')
+          && record.image.length < limit * 1.4) return record;
+    } catch {}
+    const record = await download(id);
+    if (record.image) {
+      try {
+        await fs.mkdir(directory, {recursive:true});
+        const temp = file + '.' + process.pid + '.tmp';
+        await fs.writeFile(temp, JSON.stringify(record));
+        await fs.rename(temp, file);
+      } catch {}
+    }
+    return record;
+  }
   function pump() {
     while (active < 4 && queue.length) {
       const { id, resolve } = queue.shift();
       active++;
-      download(id).then(resolve).finally(() => { active--; pump(); });
+      load(id).then(result => { if (!result.image) cache.delete(id); resolve(result); }, () => { cache.delete(id); resolve({image:"", paints:null}); }).finally(() => { active--; pump(); });
     }
   }
   function get(id) {

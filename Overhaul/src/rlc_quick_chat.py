@@ -201,9 +201,13 @@ def quick_role(bot, packet, me):
         if sustained and previous != text:
             bot.quick_candidate = (text, now)
             return
+        from rlc_bot_style import _profiles, _name
+        profile = _profiles()
+        entry = (profile[1].get(_name(me.name)) if profile else None) or {}
+        communication = entry.get("communication", 70)
         min_duration = 0.10 if text.startswith("Passing") else 0.28
-        if text and (not sustained or now - since >= min_duration):
-            if now - bot.quick_call_history.get(text, float("-inf")) >= 14 and _announce(match, me.name, text):
+        if text and (not sustained or now - since >= min_duration * (1.7 - communication / 100)):
+            if now - bot.quick_call_history.get(text, float("-inf")) >= 21 - communication / 10 and _announce(match, me.name, text):
                 bot.quick_call_history[text] = now
 
     own = -5120
@@ -211,14 +215,41 @@ def quick_role(bot, packet, me):
     support_y = max(-3500, min(2650, b.y - 1100))
     danger = phase == MatchPhase.Active and (bot.shot_coming(ball) or b.y < -4200)
 
-    if not selection or selection[0] != group:
+    if not selection or (group == "1" and selection[0] != "1") or (group == "0" and selection[0] == "1"):
+        if calls and phase == MatchPhase.Kickoff:
+            from rlc_bot_style import BotStyle
+            taker = BotStyle.kickoff_taker(packet, me.team)
+            if taker == bot.index:
+                say("I got kickoff!")
+            elif taker is not None and abs(BotStyle.support_spawn(packet, bot.index, taker)[1]) == 1280:
+                say("Following kickoff!")
         if calls and phase == MatchPhase.Active:
             say(_read_play(bot, packet, me, humans[0][1], nearest, danger), sustained=True)
         return False, None
 
     bot.quick_candidate = ("", 0.0)
     _, action = selection
-    if action == "go" and bot.index == nearest:
+    if action == "attack" and danger:
+        return False, None
+    if phase == MatchPhase.Active and action in ("defend", "rotate"):
+        defender, _ = min(bots, key=lambda entry: (_distance(entry[1].physics.location, 0, -3850), entry[0]))
+        if bot.index == defender:
+            say("Defending!" if action == "defend" else "Rotating!")
+            return True, bot.drive_to(me, (0, -3850), look)
+        return False, None
+    if phase == MatchPhase.Active and action in ("pass", "pass-mid"):
+        if danger or bot.index != nearest or b.z > 160:
+            return False, None
+        human = humans[0][1].physics
+        target = (0 if action == "pass-mid" else human.location.x + .35 * human.velocity.x,
+                  human.location.y + .35 * human.velocity.y)
+        if _distance(b, *target) < 450 or target[1] < b.y - 300:
+            return False, None
+        distance, alignment, closing = _approach(me.physics, *look)
+        if distance < 850 and alignment > .65 and closing > 200:
+            say("Passing mid!" if action == "pass-mid" else "Passing!")
+        return True, bot.drive_to(me, look, target, park=False)
+    if action in ("go", "attack") and bot.index == nearest:
         distance, alignment, closing = _approach(me.physics, *look)
         if phase == MatchPhase.Active and not danger and 650 < distance < 2200 and b.z < 320:
             if alignment > 0.6 and closing > 280:
@@ -234,7 +265,7 @@ def quick_role(bot, packet, me):
             say("Leaving it!")
         target_y = -2800 if phase == MatchPhase.Kickoff else support_y
         return True, bot.drive_to(me, (side_x, target_y), look)
-    if action == "center" and phase == MatchPhase.Active:
+    if action in ("center", "receive") and phase == MatchPhase.Active:
         receive_y = max(-2300, min(4050, b.y + 550))
         receiver, _ = min(bots, key=lambda entry: (_distance(entry[1].physics.location, 0, receive_y), entry[0]))
         if bot.index == receiver:

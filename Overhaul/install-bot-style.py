@@ -5,11 +5,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 
 PATCHES = {
+    "nexto/v5/bot_strength.py": [(
+        "    StrengthNexto().run(\n        wants_match_communications=False,\n        wants_ball_predictions=False,\n",
+        "    StrengthNexto().run(\n        wants_match_communications=False,\n        wants_ball_predictions=True,\n",
+    )],
     "nexto/v5/bot.py": [(
         "        if held is not None:\n            return held\n        return self.controls\n",
         "        if held is not None:\n            return held\n"
         "        from rlc_bot_style import adjust  # RLCareer Overhaul bot styles\n"
         "        return adjust(self, packet, self.index, self.controls)\n",
+    ), (
+        "Nexto().run(wants_match_communications=False, wants_ball_predictions=False)",
+        "Nexto().run(wants_match_communications=False, wants_ball_predictions=True)",
     )],
     "ripple/ripple_strength.py": [(
         "            controls[self.index] = held\n        self.log(packet, controls)\n",
@@ -19,6 +26,9 @@ PATCHES = {
         "            controls = dict(controls)\n"
         "            controls[self.index] = adjust(self, packet, self.index, controls[self.index])\n"
         "        self.log(packet, controls)\n",
+    ), (
+        "CareerRipple(variant).run(wants_match_communications=False, wants_ball_predictions=False)",
+        "CareerRipple(variant).run(wants_match_communications=False, wants_ball_predictions=True)",
     )],
     "calibrate/relay.py": [(
         "        self.tactics = tactics\n        self.warned = False\n",

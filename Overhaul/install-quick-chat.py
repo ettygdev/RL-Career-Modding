@@ -14,13 +14,16 @@ old_patch = "60ea0d5d9ca0c32143832ddaadf50813e804dca7905fbf123b876a964e245e1a"
 original_hash = "77a2a26123ef23c78484b917ffeda0bbb9259cadce71c3c4c33738aa7a6fa1ee"
 marker = b"# RLC Quick Chat v2"
 
+def clean_hash(data):
+    return sha256(data.replace(b"\r\n", b"\n")).hexdigest()
+
 def replace_file(target, data):
     temporary = target.with_suffix(".rlc-quick-chat.tmp")
     temporary.write_bytes(data)
     temporary.replace(target)
 
 data = source.read_bytes()
-if backup.exists() and sha256(backup.read_bytes()).hexdigest() != original_hash:
+if backup.exists() and clean_hash(backup.read_bytes()) != original_hash:
     raise SystemExit("Quick Chat: original backup does not match this Hub.")
 if sha256(data).hexdigest() == old_patch:
     data = backup.read_bytes()
@@ -47,7 +50,7 @@ after = newline.join([
     b"            return None",
 ])
 original = data.replace(after, before, 1) if marker in data else data
-if original.count(before) != 1 or sha256(original).hexdigest() != original_hash:
+if original.count(before) != 1 or clean_hash(original) != original_hash:
     raise SystemExit("Quick Chat: unsupported career_tactics.py")
 patched = original.replace(before, after, 1)
 if marker in data and data != patched:

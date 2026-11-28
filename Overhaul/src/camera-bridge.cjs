@@ -9,6 +9,8 @@ function installCameraBridge(engine, fs, path, profileData, pluginBase64, lookup
   const dll = Buffer.from(pluginBase64, 'base64');
   const processNonce = process.env.RLC_INVENTORY_LAUNCH_TOKEN || String(process.pid);
   const previousPluginHashes = new Set([
+    'f95b052c57854a1c169957d1765a348cab6df687c7dfed8b6afa70a542cb511c',
+    'c86249bb12dc20039cf6ae02702b7631ef665c99f0a80a7fcf194316d1e5a6a0',
     '8cd9463f4ade7bc95304af310472dd94773a40f32afbe5b93dd61743a3a279cf',
     'b781c9e3534d403a6b36910ab3846cb370c1b6b3f8eeae8e2b3bd8bfb255ca1a',
     'eaecce2e50fc157597fed6ba31702bf79e80430813ddbff3a027acf1bb1a8d64',
@@ -110,6 +112,11 @@ function installCameraBridge(engine, fs, path, profileData, pluginBase64, lookup
     const roster = ids.map(id => {
       const player = engine.playerById(state, id);
       return { name: wireName(player?.name || ''), isPublic: player?.real === true && !player.custom && !player.isUser,
+        attack: player?.rlcAttributes?.values?.[0] ?? player?.rating ?? 70,
+        defense: player?.rlcAttributes?.values?.[1] ?? player?.rating ?? 70,
+        passing: player?.rlcAttributes?.values?.[3] ?? player?.rating ?? 70,
+        bumps: player?.rlcAttributes?.values?.[4] ?? player?.rating ?? 70,
+        communication: player?.rlcAttributes?.values?.[7] ?? player?.rating ?? 70,
         mechanics: player?.rlcAttributes?.values?.[2] ?? player?.rating ?? 70,
         gameSense: player?.rlcAttributes?.values?.[5] ?? player?.rating ?? 70,
         ballControl: player?.rlcAttributes?.values?.[6] ?? player?.rating ?? 70 };
@@ -230,7 +237,7 @@ function installCameraBridge(engine, fs, path, profileData, pluginBase64, lookup
       try {
         atomicWrite(path.join(dir, 'rlc-bot-styles.json'), JSON.stringify({
           token, expires: entry.expires,
-          players: roster.map(({name,isPublic,mechanics,gameSense,ballControl})=>({name,isPublic,mechanics,gameSense,ballControl}))
+          players: roster
         }));
       } catch (error) { warn(error); }
       officials?.(state,fixture,dir,entry);

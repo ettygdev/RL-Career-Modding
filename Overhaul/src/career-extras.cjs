@@ -14,6 +14,7 @@ function installCareerExtras(engine, launch, curtain, scorebug, steamShortcut, o
     return Math.max(0, entry.load - Math.max(0, day(state) - entry.day) * 3);
   };
 
+  engine.rlcSimulationFatigue = (state,id) => -Math.round(workload(state,id)*.7);
   engine.sideLineup = function formLineup(state, fixture, ...args) {
     const result = originalLineup.call(this, state, fixture, ...args);
     if (fixture && Array.isArray(result)) contexts.set(fixture, { state, own: result });
@@ -27,8 +28,7 @@ function installCareerExtras(engine, launch, curtain, scorebug, steamShortcut, o
     const state = contexts.get(fixture)?.state;
     const player = state && engine.playerById(state, id);
     if (!player || player.isUser || state.userPlayerId === id) return baseline;
-    return (Number(baseline) || 0) - Math.round(workload(state, id) * 0.7) -
-      (composurePressure?.(state, fixture, player) || 0);
+    return (Number(baseline) || 0) + engine.rlcSimulationFatigue(state,id) - (composurePressure?.(state,fixture,player) || 0);
   }
   formBoost.rlcForm = true;
   engine.talkBoostFor = formBoost;
@@ -111,6 +111,7 @@ function installCareerSetup(launcherPath, modVersion) {
   const parse = value => /^(?:steam:\/\/rungameid\/)?(\d{17,20})\/?$/i.exec(value.trim())?.[1] || '';
   const style = document.createElement('style');
   style.textContent = `
+    [data-rlc-settings-panel][hidden]{display:none!important}
     #rlc-steam-setup .rlc-steam-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}
     #rlc-steam-setup .rlc-steam-steps{padding-inline-start:1.35rem;display:grid;gap:.6rem}
     #rlc-steam-setup .rlc-steam-fields{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
@@ -132,6 +133,7 @@ function installCareerSetup(launcherPath, modVersion) {
   `;
   document.head.append(style);
 
+  let setupSection = "general";
   function renderSetup(...args) {
     const id = parse(localStorage.getItem(key) || '');
     const configured = id
@@ -171,9 +173,28 @@ function installCareerSetup(launcherPath, modVersion) {
     template.innerHTML = original.apply(this,args);
     const page = template.content.querySelector('.doc-page');
     if (page) {
-      const location = page.querySelector('[data-action="pick-rl-exe"]')?.closest('.doc-platform');
-      if (location) location.insertAdjacentHTML('beforebegin',content);
-      else page.insertAdjacentHTML('beforeend',content);
+      const panel = document.createElement('div');
+      panel.className = 'ptabs';
+      panel.innerHTML = ['general','overhaul'].map(section => {
+        const active = section === setupSection;
+        return '<button type="button" class="ptab'+(active?' active':'')+'" data-rlc-settings="'+section+
+          '" aria-pressed="'+active+'">'+(section === 'general' ? tr('General','Général') : 'RLCareer Overhaul')+'</button>';
+      }).join('');
+      const general = document.createElement('div');
+      general.dataset.rlcSettingsPanel='general';
+      general.hidden=setupSection!=='general';
+      general.append(...page.childNodes);
+      const mod = document.createElement('section');
+      mod.dataset.rlcSettingsPanel='overhaul';
+      mod.hidden=setupSection!=='overhaul';
+      mod.innerHTML=content;
+      const heading=document.createElement('h2');
+      heading.textContent=tr('Settings','Paramètres');
+      page.append(heading,panel,general,mod);
+      const diagnostics = general.querySelector('.doc-card > .card-h');
+      if (diagnostics?.firstChild?.nodeType === 3) {
+        diagnostics.firstChild.textContent = tr('Diagnostics & community bots','Diagnostics et bots communautaires');
+      }
       const signature = document.createElement('footer');
       signature.className = 'rlc-setup-signature';
       signature.textContent = 'RLCareer Overhaul · Ettyg99';
@@ -182,12 +203,61 @@ function installCareerSetup(launcherPath, modVersion) {
         version.textContent = ' v' + modVersion;
         signature.append(version);
       }
-      page.append(signature);
+      mod.append(signature);
     }
     return template.innerHTML;
   }
   renderSetup.rlcSteamInput = true;
   doctorHtml = renderSetup;
+  if (typeof preDoorHtml === 'function') {
+    style.textContent += `
+      .rlc-changelog { width:min(94%,54rem); margin:1rem auto; text-align:left; }
+      .rlc-changelog summary {display:flex;align-items:center;justify-content:space-between;gap:1rem;cursor:pointer;
+        list-style:none;padding:.8rem 1rem;background:var(--navy-2);border:1px solid color-mix(in srgb,var(--text) 20%,transparent);
+        border-radius:var(--r-sm);font-weight:750}
+      .rlc-changelog summary::-webkit-details-marker{display:none}
+      .rlc-changelog summary::after{content:'+';color:var(--accent);font-size:1.3em}
+      .rlc-changelog[open] summary::after{content:'−'}
+      .rlc-changelog summary .rlc-changelog-label,.rlc-changelog .rlc-changelog-subtitle{
+        display:block;visibility:visible;opacity:1;color:var(--text,#eee);font:inherit;font-weight:750;letter-spacing:normal}
+      .rlc-changelog summary .rlc-changelog-label{margin-right:auto}
+      .rlc-changelog small{color:var(--text-dim);margin-left:auto;font-variant-numeric:tabular-nums}
+      .rlc-changelog-body{max-height:min(42vh,24rem);overflow:auto;padding:.8rem 1rem}
+      .rlc-changelog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:.75rem}
+      .rlc-changelog-grid section{padding:.8rem;background:var(--navy-2);border-inline-start:2px solid var(--accent)}
+      .rlc-changelog-grid .rlc-changelog-subtitle{margin:0 0 .35rem;font-size:1em}
+      .rlc-changelog-grid p{margin:0;color:var(--text-dim)}
+    `;
+    const groups = [
+      [tr('Bots and matches','Bots et matchs'), tr('Improved aerial contacts, passes, resets, recoveries and demo avoidance. Configurable Quick Chat with four categories.', 'Interceptions, passes, resets, recoveries et esquives de démo affinés. Quatre catégories de Quick Chat configurables.')],
+      [tr('Career and simulation','Carrière et simulation'), tr('Eight individual attributes, training plans, equipment, fatigue and composure effects.', 'Huit attributs, plans d’entraînement et effets du matériel, de la fatigue et du sang-froid.')],
+      [tr('Equipment and inventory','Matériel et inventaire'), tr('Equipment by brand, additional item images and multiple world champion titles.', 'Matériel par marque, nouvelles miniatures et titres de champions du monde multiples.')],
+      [tr('Settings and replays','Paramètres et replays'), tr('Reorganized Settings, verified launcher updates and replay export from the Rocket League save request or F9.', 'Paramètres réorganisés, mises à jour vérifiées et export de replay via Rocket League ou F9.')]
+    ];
+    const changelog = () => '<details class="rlc-changelog"><summary><strong class="rlc-changelog-label">' +
+        'Changelog</strong><small>v' + String(modVersion || '') + '</small></summary>' +
+        '<div class="rlc-changelog-body"><p>' + tr('Changes since public v0.9.14.', 'Nouveautés depuis la version publique v0.9.14.') +
+        '</p><div class="rlc-changelog-grid">' + groups.map(([title,body]) =>
+          '<section><strong class="rlc-changelog-subtitle" role="heading" aria-level="3">'+title+'</strong><p>'+body+'</p></section>').join('')+'</div></div></details>';
+    function mountChangelog() {
+      const doors=document.querySelector('.pre-doors.three');
+      const footer=doors?.closest('.pre')?.querySelector('.pre-foot');
+      if (footer && !footer.parentElement.querySelector('.rlc-changelog')) {
+        footer.insertAdjacentHTML('afterend',changelog());
+      }
+    }
+    new MutationObserver(mountChangelog).observe(document.body,{childList:true,subtree:true});
+    mountChangelog();
+  }
+  function renameSetup() {
+    for (const button of document.querySelectorAll('[data-tab="setup"]')) {
+      if (button.childElementCount === 0 && /^(setup(?: & community bots)?|configuration)$/i.test(button.textContent.trim())) {
+        button.textContent = tr('Settings','Paramètres');
+      }
+    }
+  }
+  new MutationObserver(renameSetup).observe(document.body,{childList:true,subtree:true});
+  renameSetup();
 
   function status(panel, message) {
     panel.querySelector('[role="status"]').textContent = message;
@@ -229,6 +299,20 @@ function installCareerSetup(launcherPath, modVersion) {
     }
   });
   document.addEventListener('click', async event => {
+    const settings=event.target.closest?.('[data-rlc-settings]');
+    if (settings) {
+      setupSection=settings.dataset.rlcSettings;
+      const page=settings.closest('.doc-page');
+      for (const button of page.querySelectorAll('[data-rlc-settings]')) {
+        const active=button===settings;
+        button.classList.toggle('active',active);
+        button.setAttribute('aria-pressed',String(active));
+      }
+      for (const panel of page.querySelectorAll('[data-rlc-settings-panel]')) {
+        panel.hidden=panel.dataset.rlcSettingsPanel!==setupSection;
+      }
+      return;
+    }
     const button = event.target?.closest?.('[data-rlc-steam]');
     if (!button) return;
     const panel = button.closest('#rlc-steam-setup');
